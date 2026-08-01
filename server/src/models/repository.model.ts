@@ -1,29 +1,79 @@
-import { pool } from "../config/db";
-import type { AnalysisJob, Repository } from "../types/repository";
+import { Schema, model, Types, type HydratedDocument } from "mongoose";
+import type { AnalysisJob, AnalysisStatus, Repository } from "../types/repository";
 
-function toRepository(row: any): Repository {
+interface RepositoryDoc {
+  owner: string;
+  name: string;
+  fullName: string;
+  defaultBranch: string | null;
+  description: string | null;
+  createdAt: Date;
+}
+
+const repositorySchema = new Schema<RepositoryDoc>({
+  owner: { type: String, required: true },
+  name: { type: String, required: true },
+  fullName: { type: String, required: true },
+  defaultBranch: { type: String, default: null },
+  description: { type: String, default: null },
+  createdAt: { type: Date, default: Date.now },
+});
+repositorySchema.index({ owner: 1, name: 1 }, { unique: true });
+
+const RepositoryModel = model<RepositoryDoc>("Repository", repositorySchema);
+
+interface AnalysisJobDoc {
+  repositoryId: Types.ObjectId;
+  userId: Types.ObjectId;
+  status: AnalysisStatus;
+  error: string | null;
+  fileCount: number | null;
+  summary: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const analysisJobSchema = new Schema<AnalysisJobDoc>(
+  {
+    repositoryId: { type: Schema.Types.ObjectId, ref: "Repository", required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    status: {
+      type: String,
+      enum: ["pending", "fetching", "analyzing", "completed", "failed"],
+      default: "pending",
+    },
+    error: { type: String, default: null },
+    fileCount: { type: Number, default: null },
+    summary: { type: String, default: null },
+  },
+  { timestamps: true },
+);
+
+const AnalysisJobModel = model<AnalysisJobDoc>("AnalysisJob", analysisJobSchema);
+
+function toRepository(doc: HydratedDocument<RepositoryDoc>): Repository {
   return {
-    id: row.id,
-    owner: row.owner,
-    name: row.name,
-    fullName: row.full_name,
-    defaultBranch: row.default_branch,
-    description: row.description,
-    createdAt: row.created_at,
+    id: doc.id,
+    owner: doc.owner,
+    name: doc.name,
+    fullName: doc.fullName,
+    defaultBranch: doc.defaultBranch,
+    description: doc.description,
+    createdAt: doc.createdAt,
   };
 }
 
-function toAnalysisJob(row: any): AnalysisJob {
+function toAnalysisJob(doc: HydratedDocument<AnalysisJobDoc>): AnalysisJob {
   return {
-    id: row.id,
-    repositoryId: row.repository_id,
-    userId: row.user_id,
-    status: row.status,
-    error: row.error,
-    fileCount: row.file_count,
-    summary: row.summary,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    id: doc.id,
+    repositoryId: doc.repositoryId.toString(),
+    userId: doc.userId.toString(),
+    status: doc.status,
+    error: doc.error,
+    fileCount: doc.fileCount,
+    summary: doc.summary,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
   };
 }
 
@@ -34,73 +84,63 @@ export async function upsertRepository(params: {
   defaultBranch: string;
   description: string | null;
 }): Promise<Repository> {
-  const result = await pool.query(
-    `INSERT INTO repositories (owner, name, full_name, default_branch, description)
-     VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (owner, name)
-     DO UPDATE SET full_name = $3, default_branch = $4, description = $5
-     RETURNING *`,
-    [params.owner, params.name, params.fullName, params.defaultBranch, params.description],
+  const doc = await RepositoryModel.findOneAndUpdate(
+    { owner: params.owner, name: params.name },
+    {
+      $set: {
+        fullName: params.fullName,
+        defaultBranch: params.defaultBranch,
+        description: params.description,
+      },
+    },
+    { new: true, upsert: true },
   );
-  return toRepository(result.rows[0]);
+  return toRepository(doc);
 }
 
 export async function createAnalysisJob(repositoryId: string, userId: string): Promise<AnalysisJob> {
-  const result = await pool.query(
-    `INSERT INTO analysis_jobs (repository_id, user_id) VALUES ($1, $2) RETURNING *`,
-    [repositoryId, userId],
-  );
-  return toAnalysisJob(result.rows[0]);
+  const doc = await AnalysisJobModel.create({ repositoryId, userId });
+  return toAnalysisJob(doc);
 }
 
 export async function listAnalysisJobsForUser(userId: string): Promise<AnalysisJob[]> {
-  const result = await pool.query(
-    `SELECT * FROM analysis_jobs WHERE user_id = $1 ORDER BY created_at DESC`,
-    [userId],
-  );
-  return result.rows.map(toAnalysisJob);
+  const docs = await AnalysisJobModel.find({ userId }).sort({ createdAt: -1 });
+  return docs.map(toAnalysisJob);
 }
 
 export async function updateAnalysisJob(
   id: string,
   fields: Partial<Pick<AnalysisJob, "status" | "error" | "fileCount" | "summary">>,
 ): Promise<void> {
-  await pool.query(
-    `UPDATE analysis_jobs
-     SET status = COALESCE($2, status),
-         error = COALESCE($3, error),
-         file_count = COALESCE($4, file_count),
-         summary = COALESCE($5, summary),
-         updated_at = now()
-     WHERE id = $1`,
-    [id, fields.status ?? null, fields.error ?? null, fields.fileCount ?? null, fields.summary ?? null],
-  );
+  const update: Record<string, unknown> = {};
+  if (fields.status !== undefined) update.status = fields.status;
+  if (fields.error !== undefined) update.error = fields.error;
+  if (fields.fileCount !== undefined) update.fileCount = fields.fileCount;
+  if (fields.summary !== undefined) update.summary = fields.summary;
+
+  await AnalysisJobModel.updateOne({ _id: id }, { $set: update });
 }
 
 export async function getAnalysisJobWithRepository(
   id: string,
   userId: string,
 ): Promise<(AnalysisJob & { repository: Repository }) | null> {
-  const result = await pool.query(
-    `SELECT aj.*, r.owner AS r_owner, r.name AS r_name, r.full_name AS r_full_name,
-            r.default_branch AS r_default_branch, r.description AS r_description, r.created_at AS r_created_at
-     FROM analysis_jobs aj
-     JOIN repositories r ON r.id = aj.repository_id
-     WHERE aj.id = $1 AND aj.user_id = $2`,
-    [id, userId],
-  );
-  const row = result.rows[0];
-  if (!row) return null;
+  const doc = await AnalysisJobModel.findOne({ _id: id, userId }).populate<{
+    repositoryId: HydratedDocument<RepositoryDoc>;
+  }>("repositoryId");
+  if (!doc) return null;
+
+  const repository = toRepository(doc.repositoryId);
   return {
-    ...toAnalysisJob(row),
-    repository: toRepository({
-      id: row.repository_id,
-      owner: row.r_owner,
-      name: row.r_name,
-      full_name: row.r_full_name,
-      default_branch: row.r_default_branch,
-      description: row.r_description,
-      created_at: row.r_created_at,
-    }),
+    id: doc.id,
+    repositoryId: repository.id,
+    userId: doc.userId.toString(),
+    status: doc.status,
+    error: doc.error,
+    fileCount: doc.fileCount,
+    summary: doc.summary,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+    repository,
   };
 }
