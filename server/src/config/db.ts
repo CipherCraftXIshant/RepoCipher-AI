@@ -1,9 +1,12 @@
-import { Pool } from "pg";
+import mongoose from "mongoose";
 import { env } from "./env";
 import { logger } from "./logger";
 
-export const pool = new Pool({ connectionString: env.databaseUrl });
-
-pool.on("error", (err) => {
-  logger.error({ err }, "Unexpected error on idle Postgres client");
+mongoose.connection.on("error", (err) => {
+  logger.error({ err }, "Unexpected error on MongoDB connection");
 });
+
+export async function connectDb(): Promise<void> {
+  await mongoose.connect(env.mongoUri);
+  logger.info("Connected to MongoDB");
+}

@@ -4,6 +4,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
+import { connectDb } from "./config/db";
 import { env } from "./config/env";
 import { logger } from "./config/logger";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
@@ -24,10 +25,19 @@ app.use(router);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const httpServer = createServer(app);
-const io = createSocketServer(httpServer);
-createIngestionWorker(io);
+async function main() {
+  await connectDb();
 
-httpServer.listen(env.port, () => {
-  logger.info(`Server listening on port ${env.port} (${env.nodeEnv})`);
+  const httpServer = createServer(app);
+  const io = createSocketServer(httpServer);
+  createIngestionWorker(io);
+
+  httpServer.listen(env.port, () => {
+    logger.info(`Server listening on port ${env.port} (${env.nodeEnv})`);
+  });
+}
+
+main().catch((err) => {
+  logger.error({ err }, "Failed to start server");
+  process.exit(1);
 });

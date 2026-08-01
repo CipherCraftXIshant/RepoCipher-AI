@@ -13,7 +13,7 @@ export const env = {
   port: Number(process.env.PORT ?? 4000),
   corsOrigin: required("CORS_ORIGIN", "http://localhost:5173"),
   clientUrl: process.env.CLIENT_URL ?? required("CORS_ORIGIN", "http://localhost:5173"),
-  databaseUrl: required("DATABASE_URL"),
+  mongoUri: required("MONGODB_URI"),
   redisUrl: required("REDIS_URL"),
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
   githubToken: process.env.GITHUB_TOKEN ?? "",

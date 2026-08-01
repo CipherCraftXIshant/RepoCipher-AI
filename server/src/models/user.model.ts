@@ -1,40 +1,78 @@
-import { pool } from "../config/db";
+import { Schema, model, type HydratedDocument } from "mongoose";
 import type { User } from "../types/user";
 
-function toUser(row: any): User {
+interface UserDoc {
+  email: string;
+  passwordHash: string | null;
+  googleId: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const userSchema = new Schema<UserDoc>(
+  {
+    email: { type: String, required: true, unique: true, lowercase: true },
+    passwordHash: { type: String, default: null },
+    googleId: { type: String, default: null, unique: true, sparse: true },
+    displayName: { type: String, default: null },
+    avatarUrl: { type: String, default: null },
+  },
+  { timestamps: true },
+);
+
+const UserModel = model<UserDoc>("User", userSchema);
+
+interface RefreshTokenDoc {
+  userId: Schema.Types.ObjectId;
+  tokenHash: string;
+  expiresAt: Date;
+  revokedAt: Date | null;
+  createdAt: Date;
+}
+
+const refreshTokenSchema = new Schema<RefreshTokenDoc>({
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+  tokenHash: { type: String, required: true },
+  expiresAt: { type: Date, required: true },
+  revokedAt: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const RefreshTokenModel = model<RefreshTokenDoc>("RefreshToken", refreshTokenSchema);
+
+function toUser(doc: HydratedDocument<UserDoc>): User {
   return {
-    id: row.id,
-    email: row.email,
-    passwordHash: row.password_hash,
-    googleId: row.google_id,
-    displayName: row.display_name,
-    avatarUrl: row.avatar_url,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    id: doc.id,
+    email: doc.email,
+    passwordHash: doc.passwordHash,
+    googleId: doc.googleId,
+    displayName: doc.displayName,
+    avatarUrl: doc.avatarUrl,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
   };
 }
 
 export async function createUserWithPassword(email: string, passwordHash: string): Promise<User> {
-  const result = await pool.query(
-    `INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING *`,
-    [email, passwordHash],
-  );
-  return toUser(result.rows[0]);
+  const doc = await UserModel.create({ email, passwordHash });
+  return toUser(doc);
 }
 
 export async function findUserByEmail(email: string): Promise<User | null> {
-  const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [email]);
-  return result.rows[0] ? toUser(result.rows[0]) : null;
+  const doc = await UserModel.findOne({ email });
+  return doc ? toUser(doc) : null;
 }
 
 export async function findUserById(id: string): Promise<User | null> {
-  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
-  return result.rows[0] ? toUser(result.rows[0]) : null;
+  const doc = await UserModel.findById(id);
+  return doc ? toUser(doc) : null;
 }
 
 export async function findUserByGoogleId(googleId: string): Promise<User | null> {
-  const result = await pool.query(`SELECT * FROM users WHERE google_id = $1`, [googleId]);
-  return result.rows[0] ? toUser(result.rows[0]) : null;
+  const doc = await UserModel.findOne({ googleId });
+  return doc ? toUser(doc) : null;
 }
 
 export async function upsertGoogleUser(params: {
@@ -46,36 +84,34 @@ export async function upsertGoogleUser(params: {
   const existingByGoogleId = await findUserByGoogleId(params.googleId);
   if (existingByGoogleId) return existingByGoogleId;
 
-  const existingByEmail = await findUserByEmail(params.email);
+  const existingByEmail = await UserModel.findOne({ email: params.email });
   if (existingByEmail) {
-    const result = await pool.query(
-      `UPDATE users SET google_id = $2, display_name = COALESCE(display_name, $3), avatar_url = COALESCE(avatar_url, $4), updated_at = now()
-       WHERE id = $1 RETURNING *`,
-      [existingByEmail.id, params.googleId, params.displayName, params.avatarUrl],
-    );
-    return toUser(result.rows[0]);
+    existingByEmail.googleId = params.googleId;
+    existingByEmail.displayName = existingByEmail.displayName ?? params.displayName;
+    existingByEmail.avatarUrl = existingByEmail.avatarUrl ?? params.avatarUrl;
+    await existingByEmail.save();
+    return toUser(existingByEmail);
   }
 
-  const result = await pool.query(
-    `INSERT INTO users (email, google_id, display_name, avatar_url) VALUES ($1, $2, $3, $4) RETURNING *`,
-    [params.email, params.googleId, params.displayName, params.avatarUrl],
-  );
-  return toUser(result.rows[0]);
+  const doc = await UserModel.create({
+    email: params.email,
+    googleId: params.googleId,
+    displayName: params.displayName,
+    avatarUrl: params.avatarUrl,
+  });
+  return toUser(doc);
 }
 
 export async function updateAvatarUrl(userId: string, avatarUrl: string): Promise<User> {
-  const result = await pool.query(
-    `UPDATE users SET avatar_url = $2, updated_at = now() WHERE id = $1 RETURNING *`,
-    [userId, avatarUrl],
-  );
-  return toUser(result.rows[0]);
+  const doc = await UserModel.findByIdAndUpdate(userId, { avatarUrl }, { new: true });
+  if (!doc) {
+    throw new Error(`User not found: ${userId}`);
+  }
+  return toUser(doc);
 }
 
 export async function storeRefreshToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
-  await pool.query(
-    `INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)`,
-    [userId, tokenHash, expiresAt],
-  );
+  await RefreshTokenModel.create({ userId, tokenHash, expiresAt });
 }
 
 export interface RefreshTokenRow {
@@ -84,15 +120,14 @@ export interface RefreshTokenRow {
 }
 
 export async function findValidRefreshToken(tokenHash: string): Promise<RefreshTokenRow | null> {
-  const result = await pool.query(
-    `SELECT id, user_id FROM refresh_tokens
-     WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > now()`,
-    [tokenHash],
-  );
-  const row = result.rows[0];
-  return row ? { id: row.id, userId: row.user_id } : null;
+  const doc = await RefreshTokenModel.findOne({
+    tokenHash,
+    revokedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+  return doc ? { id: doc.id, userId: doc.userId.toString() } : null;
 }
 
 export async function revokeRefreshToken(tokenHash: string): Promise<void> {
-  await pool.query(`UPDATE refresh_tokens SET revoked_at = now() WHERE token_hash = $1`, [tokenHash]);
+  await RefreshTokenModel.updateOne({ tokenHash }, { revokedAt: new Date() });
 }
