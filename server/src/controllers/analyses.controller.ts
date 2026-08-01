@@ -1,6 +1,11 @@
 import type { Request, Response } from "express";
 import { HttpError } from "../middleware/errorHandler";
-import { createAnalysisJob, getAnalysisJobWithRepository, upsertRepository } from "../models/repository.model";
+import {
+  createAnalysisJob,
+  getAnalysisJobWithRepository,
+  listAnalysisJobsForUser,
+  upsertRepository,
+} from "../models/repository.model";
 import { ingestionQueue } from "../queues/ingestion.queue";
 import { fetchRepoMetadata, parseGithubUrl } from "../utils/github";
 
@@ -24,16 +29,21 @@ export async function createAnalysis(req: Request, res: Response) {
     description: metadata.description,
   });
 
-  const job = await createAnalysisJob(repository.id);
+  const job = await createAnalysisJob(repository.id, req.userId!);
   await ingestionQueue.add("ingest", { jobId: job.id, owner: ref.owner, repo: ref.repo });
 
   res.status(202).json({ jobId: job.id, repository });
 }
 
 export async function getAnalysis(req: Request, res: Response) {
-  const job = await getAnalysisJobWithRepository(req.params.id);
+  const job = await getAnalysisJobWithRepository(req.params.id, req.userId!);
   if (!job) {
     throw new HttpError(404, "Analysis job not found");
   }
   res.json(job);
+}
+
+export async function listMyAnalyses(req: Request, res: Response) {
+  const jobs = await listAnalysisJobsForUser(req.userId!);
+  res.json({ jobs });
 }

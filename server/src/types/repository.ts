@@ -18,6 +18,7 @@ export interface Repository {
 export interface AnalysisJob {
   id: string;
   repositoryId: string;
+  userId: string;
   status: AnalysisStatus;
   error: string | null;
   fileCount: number | null;

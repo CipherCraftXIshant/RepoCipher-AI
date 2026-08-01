@@ -17,6 +17,7 @@ function toAnalysisJob(row: any): AnalysisJob {
   return {
     id: row.id,
     repositoryId: row.repository_id,
+    userId: row.user_id,
     status: row.status,
     error: row.error,
     fileCount: row.file_count,
@@ -44,12 +45,20 @@ export async function upsertRepository(params: {
   return toRepository(result.rows[0]);
 }
 
-export async function createAnalysisJob(repositoryId: string): Promise<AnalysisJob> {
+export async function createAnalysisJob(repositoryId: string, userId: string): Promise<AnalysisJob> {
   const result = await pool.query(
-    `INSERT INTO analysis_jobs (repository_id) VALUES ($1) RETURNING *`,
-    [repositoryId],
+    `INSERT INTO analysis_jobs (repository_id, user_id) VALUES ($1, $2) RETURNING *`,
+    [repositoryId, userId],
   );
   return toAnalysisJob(result.rows[0]);
+}
+
+export async function listAnalysisJobsForUser(userId: string): Promise<AnalysisJob[]> {
+  const result = await pool.query(
+    `SELECT * FROM analysis_jobs WHERE user_id = $1 ORDER BY created_at DESC`,
+    [userId],
+  );
+  return result.rows.map(toAnalysisJob);
 }
 
 export async function updateAnalysisJob(
@@ -70,14 +79,15 @@ export async function updateAnalysisJob(
 
 export async function getAnalysisJobWithRepository(
   id: string,
+  userId: string,
 ): Promise<(AnalysisJob & { repository: Repository }) | null> {
   const result = await pool.query(
     `SELECT aj.*, r.owner AS r_owner, r.name AS r_name, r.full_name AS r_full_name,
             r.default_branch AS r_default_branch, r.description AS r_description, r.created_at AS r_created_at
      FROM analysis_jobs aj
      JOIN repositories r ON r.id = aj.repository_id
-     WHERE aj.id = $1`,
-    [id],
+     WHERE aj.id = $1 AND aj.user_id = $2`,
+    [id, userId],
   );
   const row = result.rows[0];
   if (!row) return null;

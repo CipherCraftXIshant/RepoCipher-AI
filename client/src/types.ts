@@ -24,3 +24,11 @@ export interface AnalysisJob {
 export interface AnalysisJobWithRepository extends AnalysisJob {
   repository: Repository;
 }
+
+export interface User {
+  id: string;
+  email: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  createdAt: string;
+}
