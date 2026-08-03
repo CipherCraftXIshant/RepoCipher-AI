@@ -37,3 +37,7 @@ client/.vite/
 *.local
 .cache/
 tmp/
+
+
+#claude
+.claude
