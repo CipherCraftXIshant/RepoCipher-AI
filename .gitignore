@@ -41,3 +41,4 @@ tmp/
 
 #claude
 .claude
+.claude/worktrees
