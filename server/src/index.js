@@ -1,16 +1,16 @@
-import { createServer } from "http";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import express from "express";
-import helmet from "helmet";
-import pinoHttp from "pino-http";
-import { connectDb } from "./config/db";
-import { env } from "./config/env";
-import { logger } from "./config/logger";
-import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
-import { createIngestionWorker } from "./queues/ingestion.worker";
-import { router } from "./routes";
-import { createSocketServer } from "./sockets";
+const { createServer } = require("http");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const express = require("express");
+const helmet = require("helmet");
+const pinoHttp = require("pino-http");
+const { connectDb } = require("./config/db");
+const { env } = require("./config/env");
+const { logger } = require("./config/logger");
+const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
+const { createIngestionWorker } = require("./queues/ingestion.worker");
+const { router } = require("./routes");
+const { createSocketServer } = require("./sockets");
 
 const app = express();
 

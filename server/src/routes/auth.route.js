@@ -1,5 +1,5 @@
-import { Router } from "express";
-import {
+const { Router } = require("express");
+const {
   googleCallback,
   googleStart,
   login,
@@ -7,11 +7,11 @@ import {
   me,
   refresh,
   signup,
-} from "../controllers/auth.controller";
-import { requireAuth } from "../middleware/auth";
-import { asyncHandler } from "../utils/asyncHandler";
+} = require("../controllers/auth.controller");
+const { requireAuth } = require("../middleware/auth");
+const { asyncHandler } = require("../utils/asyncHandler");
 
-export const authRouter = Router();
+const authRouter = Router();
 
 authRouter.post("/signup", asyncHandler(signup));
 authRouter.post("/login", asyncHandler(login));
@@ -21,3 +21,5 @@ authRouter.get("/me", requireAuth, asyncHandler(me));
 
 authRouter.get("/google", asyncHandler(googleStart));
 authRouter.get("/google/callback", asyncHandler(googleCallback));
+
+module.exports = { authRouter };

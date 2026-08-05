@@ -1,17 +1,17 @@
-import type { NextFunction, Request, Response } from "express";
-import { logger } from "../config/logger";
+const { logger } = require("../config/logger");
 
-export class HttpError extends Error {
-  constructor(public status: number, message: string) {
+class HttpError extends Error {
+  constructor(status, message) {
     super(message);
+    this.status = status;
   }
 }
 
-export function notFoundHandler(req: Request, res: Response) {
+function notFoundHandler(req, res) {
   res.status(404).json({ error: `Not found: ${req.method} ${req.path}` });
 }
 
-export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
+function errorHandler(err, req, res, _next) {
   const status = err instanceof HttpError ? err.status : 500;
   const message = err instanceof Error ? err.message : "Internal server error";
 
@@ -21,3 +21,5 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
 
   res.status(status).json({ error: message });
 }
+
+module.exports = { HttpError, notFoundHandler, errorHandler };

@@ -1,12 +1,14 @@
-import mongoose from "mongoose";
-import { env } from "./env";
-import { logger } from "./logger";
+const mongoose = require("mongoose");
+const { env } = require("./env");
+const { logger } = require("./logger");
 
 mongoose.connection.on("error", (err) => {
   logger.error({ err }, "Unexpected error on MongoDB connection");
 });
 
-export async function connectDb(): Promise<void> {
+async function connectDb() {
   await mongoose.connect(env.mongoUri);
   logger.info("Connected to MongoDB");
 }
+
+module.exports = { connectDb };

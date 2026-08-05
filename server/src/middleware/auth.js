@@ -1,14 +1,7 @@
-import type { NextFunction, Request, Response } from "express";
-import { verifyAccessToken } from "../utils/jwt";
-import { HttpError } from "./errorHandler";
+const { verifyAccessToken } = require("../utils/jwt");
+const { HttpError } = require("./errorHandler");
 
-declare module "express-serve-static-core" {
-  interface Request {
-    userId?: string;
-  }
-}
-
-export function requireAuth(req: Request, _res: Response, next: NextFunction) {
+function requireAuth(req, _res, next) {
   const header = req.headers.authorization;
   const token = header?.startsWith("Bearer ") ? header.slice("Bearer ".length) : null;
   if (!token) {
@@ -23,3 +16,5 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
   req.userId = payload.sub;
   next();
 }
+
+module.exports = { requireAuth };

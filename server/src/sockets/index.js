@@ -1,9 +1,8 @@
-import type { Server as HttpServer } from "http";
-import { Server } from "socket.io";
-import { env } from "../config/env";
-import { logger } from "../config/logger";
+const { Server } = require("socket.io");
+const { env } = require("../config/env");
+const { logger } = require("../config/logger");
 
-export function createSocketServer(httpServer: HttpServer) {
+function createSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: { origin: env.corsOrigin },
   });
@@ -11,7 +10,7 @@ export function createSocketServer(httpServer: HttpServer) {
   io.on("connection", (socket) => {
     logger.debug({ socketId: socket.id }, "Socket connected");
 
-    socket.on("subscribe", (jobId: string) => {
+    socket.on("subscribe", (jobId) => {
       socket.join(jobId);
     });
 
@@ -22,3 +21,5 @@ export function createSocketServer(httpServer: HttpServer) {
 
   return io;
 }
+
+module.exports = { createSocketServer };

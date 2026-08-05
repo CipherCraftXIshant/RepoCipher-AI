@@ -1,16 +1,6 @@
-import { Schema, model, Types, type HydratedDocument } from "mongoose";
-import type { AnalysisJob, AnalysisStatus, Repository } from "../types/repository";
+const { Schema, model } = require("mongoose");
 
-interface RepositoryDoc {
-  owner: string;
-  name: string;
-  fullName: string;
-  defaultBranch: string | null;
-  description: string | null;
-  createdAt: Date;
-}
-
-const repositorySchema = new Schema<RepositoryDoc>({
+const repositorySchema = new Schema({
   owner: { type: String, required: true },
   name: { type: String, required: true },
   fullName: { type: String, required: true },
@@ -20,20 +10,9 @@ const repositorySchema = new Schema<RepositoryDoc>({
 });
 repositorySchema.index({ owner: 1, name: 1 }, { unique: true });
 
-const RepositoryModel = model<RepositoryDoc>("Repository", repositorySchema);
+const RepositoryModel = model("Repository", repositorySchema);
 
-interface AnalysisJobDoc {
-  repositoryId: Types.ObjectId;
-  userId: Types.ObjectId;
-  status: AnalysisStatus;
-  error: string | null;
-  fileCount: number | null;
-  summary: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const analysisJobSchema = new Schema<AnalysisJobDoc>(
+const analysisJobSchema = new Schema(
   {
     repositoryId: { type: Schema.Types.ObjectId, ref: "Repository", required: true, index: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
@@ -49,9 +28,9 @@ const analysisJobSchema = new Schema<AnalysisJobDoc>(
   { timestamps: true },
 );
 
-const AnalysisJobModel = model<AnalysisJobDoc>("AnalysisJob", analysisJobSchema);
+const AnalysisJobModel = model("AnalysisJob", analysisJobSchema);
 
-function toRepository(doc: HydratedDocument<RepositoryDoc>): Repository {
+function toRepository(doc) {
   return {
     id: doc.id,
     owner: doc.owner,
@@ -63,7 +42,7 @@ function toRepository(doc: HydratedDocument<RepositoryDoc>): Repository {
   };
 }
 
-function toAnalysisJob(doc: HydratedDocument<AnalysisJobDoc>): AnalysisJob {
+function toAnalysisJob(doc) {
   return {
     id: doc.id,
     repositoryId: doc.repositoryId.toString(),
@@ -77,13 +56,7 @@ function toAnalysisJob(doc: HydratedDocument<AnalysisJobDoc>): AnalysisJob {
   };
 }
 
-export async function upsertRepository(params: {
-  owner: string;
-  name: string;
-  fullName: string;
-  defaultBranch: string;
-  description: string | null;
-}): Promise<Repository> {
+async function upsertRepository(params) {
   const doc = await RepositoryModel.findOneAndUpdate(
     { owner: params.owner, name: params.name },
     {
@@ -98,21 +71,18 @@ export async function upsertRepository(params: {
   return toRepository(doc);
 }
 
-export async function createAnalysisJob(repositoryId: string, userId: string): Promise<AnalysisJob> {
+async function createAnalysisJob(repositoryId, userId) {
   const doc = await AnalysisJobModel.create({ repositoryId, userId });
   return toAnalysisJob(doc);
 }
 
-export async function listAnalysisJobsForUser(userId: string): Promise<AnalysisJob[]> {
+async function listAnalysisJobsForUser(userId) {
   const docs = await AnalysisJobModel.find({ userId }).sort({ createdAt: -1 });
   return docs.map(toAnalysisJob);
 }
 
-export async function updateAnalysisJob(
-  id: string,
-  fields: Partial<Pick<AnalysisJob, "status" | "error" | "fileCount" | "summary">>,
-): Promise<void> {
-  const update: Record<string, unknown> = {};
+async function updateAnalysisJob(id, fields) {
+  const update = {};
   if (fields.status !== undefined) update.status = fields.status;
   if (fields.error !== undefined) update.error = fields.error;
   if (fields.fileCount !== undefined) update.fileCount = fields.fileCount;
@@ -121,13 +91,8 @@ export async function updateAnalysisJob(
   await AnalysisJobModel.updateOne({ _id: id }, { $set: update });
 }
 
-export async function getAnalysisJobWithRepository(
-  id: string,
-  userId: string,
-): Promise<(AnalysisJob & { repository: Repository }) | null> {
-  const doc = await AnalysisJobModel.findOne({ _id: id, userId }).populate<{
-    repositoryId: HydratedDocument<RepositoryDoc>;
-  }>("repositoryId");
+async function getAnalysisJobWithRepository(id, userId) {
+  const doc = await AnalysisJobModel.findOne({ _id: id, userId }).populate("repositoryId");
   if (!doc) return null;
 
   const repository = toRepository(doc.repositoryId);
@@ -144,3 +109,11 @@ export async function getAnalysisJobWithRepository(
     repository,
   };
 }
+
+module.exports = {
+  upsertRepository,
+  createAnalysisJob,
+  listAnalysisJobsForUser,
+  updateAnalysisJob,
+  getAnalysisJobWithRepository,
+};

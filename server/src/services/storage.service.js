@@ -1,6 +1,6 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { randomUUID } from "crypto";
-import { env } from "../config/env";
+const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
+const { randomUUID } = require("crypto");
+const { env } = require("../config/env");
 
 const client = new S3Client({
   region: "auto",
@@ -11,7 +11,7 @@ const client = new S3Client({
   },
 });
 
-export async function uploadAvatar(userId: string, buffer: Buffer, contentType: string): Promise<string> {
+async function uploadAvatar(userId, buffer, contentType) {
   const extension = contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
   const key = `avatars/${userId}/${randomUUID()}.${extension}`;
 
@@ -27,3 +27,5 @@ export async function uploadAvatar(userId: string, buffer: Buffer, contentType: 
 
   return `${env.r2PublicUrl.replace(/\/$/, "")}/${key}`;
 }
+
+module.exports = { uploadAvatar };

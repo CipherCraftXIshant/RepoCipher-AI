@@ -1,18 +1,17 @@
-import { Worker } from "bullmq";
-import type { Server } from "socket.io";
-import { createRedisConnection } from "../config/redis";
-import { logger } from "../config/logger";
-import { updateAnalysisJob } from "../models/repository.model";
-import { summarizeRepository } from "../services/anthropic.service";
-import { fetchFileContent, fetchRepoMetadata, fetchRepoTree } from "../utils/github";
-import { INGESTION_QUEUE_NAME, type IngestionJobData } from "./ingestion.queue";
+const { Worker } = require("bullmq");
+const { createRedisConnection } = require("../config/redis");
+const { logger } = require("../config/logger");
+const { updateAnalysisJob } = require("../models/repository.model");
+const { summarizeRepository } = require("../services/anthropic.service");
+const { fetchFileContent, fetchRepoMetadata, fetchRepoTree } = require("../utils/github");
+const { INGESTION_QUEUE_NAME } = require("./ingestion.queue");
 
-export function createIngestionWorker(io: Server) {
-  const emitProgress = (jobId: string, status: string) => {
+function createIngestionWorker(io) {
+  const emitProgress = (jobId, status) => {
     io.to(jobId).emit("analysis:progress", { jobId, status });
   };
 
-  return new Worker<IngestionJobData>(
+  return new Worker(
     INGESTION_QUEUE_NAME,
     async (job) => {
       const { jobId, owner, repo } = job.data;
@@ -49,3 +48,5 @@ export function createIngestionWorker(io: Server) {
     { connection: createRedisConnection() },
   );
 }
+
+module.exports = { createIngestionWorker };

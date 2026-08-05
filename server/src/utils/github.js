@@ -1,10 +1,9 @@
-import { env } from "../config/env";
-import { HttpError } from "../middleware/errorHandler";
-import type { GithubRepoRef } from "../types/repository";
+const { env } = require("../config/env");
+const { HttpError } = require("../middleware/errorHandler");
 
 const GITHUB_API = "https://api.github.com";
 
-export function parseGithubUrl(input: string): GithubRepoRef | null {
+function parseGithubUrl(input) {
   const trimmed = input.trim();
 
   const shorthand = trimmed.match(/^([\w.-]+)\/([\w.-]+?)(\.git)?$/);
@@ -23,13 +22,13 @@ export function parseGithubUrl(input: string): GithubRepoRef | null {
   }
 }
 
-function authHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
+function authHeaders() {
+  const headers = { Accept: "application/vnd.github+json" };
   if (env.githubToken) headers.Authorization = `Bearer ${env.githubToken}`;
   return headers;
 }
 
-async function githubFetch(path: string): Promise<Response> {
+async function githubFetch(path) {
   const res = await fetch(`${GITHUB_API}${path}`, { headers: authHeaders() });
   if (res.status === 404) {
     throw new HttpError(404, "GitHub repository not found");
@@ -43,15 +42,9 @@ async function githubFetch(path: string): Promise<Response> {
   return res;
 }
 
-export interface GithubRepoMetadata {
-  fullName: string;
-  defaultBranch: string;
-  description: string | null;
-}
-
-export async function fetchRepoMetadata(ref: GithubRepoRef): Promise<GithubRepoMetadata> {
+async function fetchRepoMetadata(ref) {
   const res = await githubFetch(`/repos/${ref.owner}/${ref.repo}`);
-  const data = (await res.json()) as any;
+  const data = await res.json();
   return {
     fullName: data.full_name,
     defaultBranch: data.default_branch,
@@ -59,23 +52,19 @@ export async function fetchRepoMetadata(ref: GithubRepoRef): Promise<GithubRepoM
   };
 }
 
-export interface GithubTreeEntry {
-  path: string;
-  type: "blob" | "tree";
-  size?: number;
-}
-
-export async function fetchRepoTree(ref: GithubRepoRef, branch: string): Promise<GithubTreeEntry[]> {
+async function fetchRepoTree(ref, branch) {
   const res = await githubFetch(`/repos/${ref.owner}/${ref.repo}/git/trees/${branch}?recursive=1`);
-  const data = (await res.json()) as any;
-  return (data.tree ?? []) as GithubTreeEntry[];
+  const data = await res.json();
+  return data.tree ?? [];
 }
 
-export async function fetchFileContent(ref: GithubRepoRef, path: string, branch: string): Promise<string> {
+async function fetchFileContent(ref, path, branch) {
   const res = await githubFetch(`/repos/${ref.owner}/${ref.repo}/contents/${path}?ref=${branch}`);
-  const data = (await res.json()) as any;
+  const data = await res.json();
   if (data.encoding !== "base64") {
     throw new HttpError(502, `Unexpected encoding for ${path}`);
   }
   return Buffer.from(data.content, "base64").toString("utf-8");
 }
+
+module.exports = { parseGithubUrl, fetchRepoMetadata, fetchRepoTree, fetchFileContent };

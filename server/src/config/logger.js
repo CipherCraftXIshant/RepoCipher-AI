@@ -1,7 +1,7 @@
-import pino from "pino";
-import { isProduction } from "./env";
+const pino = require("pino");
+const { isProduction } = require("./env");
 
-export const logger = pino({
+const logger = pino({
   level: process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug"),
   transport: isProduction
     ? undefined
@@ -10,3 +10,5 @@ export const logger = pino({
         options: { colorize: true, translateTime: "HH:MM:ss", ignore: "pid,hostname" },
       },
 });
+
+module.exports = { logger };

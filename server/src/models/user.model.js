@@ -1,17 +1,6 @@
-import { Schema, model, type HydratedDocument } from "mongoose";
-import type { User } from "../types/user";
+const { Schema, model } = require("mongoose");
 
-interface UserDoc {
-  email: string;
-  passwordHash: string | null;
-  googleId: string | null;
-  displayName: string | null;
-  avatarUrl: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const userSchema = new Schema<UserDoc>(
+const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true, lowercase: true },
     passwordHash: { type: String, default: null },
@@ -22,17 +11,9 @@ const userSchema = new Schema<UserDoc>(
   { timestamps: true },
 );
 
-const UserModel = model<UserDoc>("User", userSchema);
+const UserModel = model("User", userSchema);
 
-interface RefreshTokenDoc {
-  userId: Schema.Types.ObjectId;
-  tokenHash: string;
-  expiresAt: Date;
-  revokedAt: Date | null;
-  createdAt: Date;
-}
-
-const refreshTokenSchema = new Schema<RefreshTokenDoc>({
+const refreshTokenSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
   tokenHash: { type: String, required: true },
   expiresAt: { type: Date, required: true },
@@ -40,9 +21,9 @@ const refreshTokenSchema = new Schema<RefreshTokenDoc>({
   createdAt: { type: Date, default: Date.now },
 });
 
-const RefreshTokenModel = model<RefreshTokenDoc>("RefreshToken", refreshTokenSchema);
+const RefreshTokenModel = model("RefreshToken", refreshTokenSchema);
 
-function toUser(doc: HydratedDocument<UserDoc>): User {
+function toUser(doc) {
   return {
     id: doc.id,
     email: doc.email,
@@ -55,32 +36,27 @@ function toUser(doc: HydratedDocument<UserDoc>): User {
   };
 }
 
-export async function createUserWithPassword(email: string, passwordHash: string): Promise<User> {
+async function createUserWithPassword(email, passwordHash) {
   const doc = await UserModel.create({ email, passwordHash });
   return toUser(doc);
 }
 
-export async function findUserByEmail(email: string): Promise<User | null> {
+async function findUserByEmail(email) {
   const doc = await UserModel.findOne({ email });
   return doc ? toUser(doc) : null;
 }
 
-export async function findUserById(id: string): Promise<User | null> {
+async function findUserById(id) {
   const doc = await UserModel.findById(id);
   return doc ? toUser(doc) : null;
 }
 
-export async function findUserByGoogleId(googleId: string): Promise<User | null> {
+async function findUserByGoogleId(googleId) {
   const doc = await UserModel.findOne({ googleId });
   return doc ? toUser(doc) : null;
 }
 
-export async function upsertGoogleUser(params: {
-  googleId: string;
-  email: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-}): Promise<User> {
+async function upsertGoogleUser(params) {
   const existingByGoogleId = await findUserByGoogleId(params.googleId);
   if (existingByGoogleId) return existingByGoogleId;
 
@@ -102,7 +78,7 @@ export async function upsertGoogleUser(params: {
   return toUser(doc);
 }
 
-export async function updateAvatarUrl(userId: string, avatarUrl: string): Promise<User> {
+async function updateAvatarUrl(userId, avatarUrl) {
   const doc = await UserModel.findByIdAndUpdate(userId, { avatarUrl }, { new: true });
   if (!doc) {
     throw new Error(`User not found: ${userId}`);
@@ -110,16 +86,11 @@ export async function updateAvatarUrl(userId: string, avatarUrl: string): Promis
   return toUser(doc);
 }
 
-export async function storeRefreshToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
+async function storeRefreshToken(userId, tokenHash, expiresAt) {
   await RefreshTokenModel.create({ userId, tokenHash, expiresAt });
 }
 
-export interface RefreshTokenRow {
-  id: string;
-  userId: string;
-}
-
-export async function findValidRefreshToken(tokenHash: string): Promise<RefreshTokenRow | null> {
+async function findValidRefreshToken(tokenHash) {
   const doc = await RefreshTokenModel.findOne({
     tokenHash,
     revokedAt: null,
@@ -128,6 +99,18 @@ export async function findValidRefreshToken(tokenHash: string): Promise<RefreshT
   return doc ? { id: doc.id, userId: doc.userId.toString() } : null;
 }
 
-export async function revokeRefreshToken(tokenHash: string): Promise<void> {
+async function revokeRefreshToken(tokenHash) {
   await RefreshTokenModel.updateOne({ tokenHash }, { revokedAt: new Date() });
 }
+
+module.exports = {
+  createUserWithPassword,
+  findUserByEmail,
+  findUserById,
+  findUserByGoogleId,
+  upsertGoogleUser,
+  updateAvatarUrl,
+  storeRefreshToken,
+  findValidRefreshToken,
+  revokeRefreshToken,
+};

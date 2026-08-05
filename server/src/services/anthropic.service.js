@@ -1,16 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { env } from "../config/env";
-import type { GithubRepoMetadata } from "../utils/github";
+const Anthropic = require("@anthropic-ai/sdk");
+const { env } = require("../config/env");
 
 const client = new Anthropic({ apiKey: env.anthropicApiKey });
 
-export interface RepositorySummaryInput {
-  metadata: GithubRepoMetadata;
-  filePaths: string[];
-  readme: string | null;
-}
-
-export async function summarizeRepository(input: RepositorySummaryInput): Promise<string> {
+async function summarizeRepository(input) {
   const { metadata, filePaths, readme } = input;
 
   const treeListing = filePaths.slice(0, 500).join("\n");
@@ -49,3 +42,5 @@ export async function summarizeRepository(input: RepositorySummaryInput): Promis
   }
   return textBlock.text;
 }
+
+module.exports = { summarizeRepository };
