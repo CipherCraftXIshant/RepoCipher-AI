@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-function IconSparkle(props: { className?: string }) {
+function IconSparkle(props) {
   return (
     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className={props.className}>
       <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z" />
@@ -10,7 +10,7 @@ function IconSparkle(props: { className?: string }) {
   );
 }
 
-function IconClock(props: { className?: string }) {
+function IconClock(props) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={props.className}>
       <circle cx="12" cy="12" r="9" />
@@ -19,7 +19,7 @@ function IconClock(props: { className?: string }) {
   );
 }
 
-function IconBranch(props: { className?: string }) {
+function IconBranch(props) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={props.className}>
       <circle cx="6" cy="5" r="2.2" />
@@ -30,7 +30,7 @@ function IconBranch(props: { className?: string }) {
   );
 }
 
-function IconFile(props: { className?: string }) {
+function IconFile(props) {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={props.className}>
       <path d="M6 3h8l4 4v14H6z" />
@@ -60,28 +60,28 @@ const METRICS = [
     label: "Time to first read",
     value: "~90 sec",
     delta: "↓ 95%",
-    deltaTone: "good" as const,
+    deltaTone: "good",
     note: "vs. cloning and reading the code yourself.",
   },
   {
     label: "Setup required",
     value: "0 min",
     delta: "",
-    deltaTone: "good" as const,
+    deltaTone: "good",
     note: "No cloning, no local environment, just a URL.",
   },
   {
     label: "Coverage per repo",
     value: "Full tree",
     delta: "",
-    deltaTone: "neutral" as const,
+    deltaTone: "neutral",
     note: "Structure, README, and stack pulled in one pass.",
   },
   {
     label: "Output format",
     value: "1 doc",
     delta: "",
-    deltaTone: "neutral" as const,
+    deltaTone: "neutral",
     note: "Architecture, stack, and where to start reading.",
   },
 ];

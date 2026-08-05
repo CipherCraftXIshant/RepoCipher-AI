@@ -1,27 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, loginRequest, logoutRequest, refreshRequest, signupRequest } from "../api";
-import type { User } from "../types";
 
-type AuthStatus = "loading" | "anonymous" | "authenticated";
+const AuthContext = createContext(null);
 
-interface AuthContextValue {
-  status: AuthStatus;
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  loginWithGoogle: () => void;
-  completeGoogleLogin: () => Promise<void>;
-  setUser: (user: User) => void;
-  withAuth: <T>(fn: (accessToken: string) => Promise<T>) => Promise<T>;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>("loading");
-  const [user, setUser] = useState<User | null>(null);
-  const accessTokenRef = useRef<string | null>(null);
+export function AuthProvider({ children }) {
+  const [status, setStatus] = useState("loading");
+  const [user, setUser] = useState(null);
+  const accessTokenRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,14 +26,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email, password) => {
     const result = await loginRequest(email, password);
     accessTokenRef.current = result.accessToken;
     setUser(result.user);
     setStatus("authenticated");
   }, []);
 
-  const signup = useCallback(async (email: string, password: string) => {
+  const signup = useCallback(async (email, password) => {
     const result = await signupRequest(email, password);
     accessTokenRef.current = result.accessToken;
     setUser(result.user);
@@ -73,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus(result.user ? "authenticated" : "anonymous");
   }, []);
 
-  const withAuth = useCallback(async <T,>(fn: (accessToken: string) => Promise<T>): Promise<T> => {
+  const withAuth = useCallback(async (fn) => {
     if (!accessTokenRef.current) {
       throw new ApiError(401, "Not authenticated");
     }
@@ -90,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo<AuthContextValue>(
+  const value = useMemo(
     () => ({ status, user, login, signup, logout, loginWithGoogle, completeGoogleLogin, setUser, withAuth }),
     [status, user, login, signup, logout, loginWithGoogle, completeGoogleLogin, withAuth],
   );
@@ -98,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth(): AuthContextValue {
+export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;

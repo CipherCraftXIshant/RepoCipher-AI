@@ -11,7 +11,6 @@
     "dev": "concurrently -n server,client -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm run dev --workspace=server",
     "dev:client": "npm run dev --workspace=client",
-    "build:server": "npm run build --workspace=server",
     "build:client": "npm run build --workspace=client"
   },
   "devDependencies": {

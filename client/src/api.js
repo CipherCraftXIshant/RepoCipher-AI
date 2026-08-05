@@ -1,15 +1,11 @@
-import type { AnalysisJob, AnalysisJobWithRepository, Repository, User } from "./types";
-
 export class ApiError extends Error {
-  status: number;
-
-  constructor(status: number, message: string) {
+  constructor(status, message) {
     super(message);
     this.status = status;
   }
 }
 
-async function parseJsonOrThrow(res: Response) {
+async function parseJsonOrThrow(res) {
   if (res.status === 204) return null;
   const body = await res.json().catch(() => null);
   if (!res.ok) {
@@ -19,11 +15,11 @@ async function parseJsonOrThrow(res: Response) {
   return body;
 }
 
-function authHeaders(accessToken: string | null): HeadersInit {
+function authHeaders(accessToken) {
   return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 }
 
-export async function signupRequest(email: string, password: string): Promise<{ accessToken: string; user: User }> {
+export async function signupRequest(email, password) {
   const res = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -32,7 +28,7 @@ export async function signupRequest(email: string, password: string): Promise<{ 
   return parseJsonOrThrow(res);
 }
 
-export async function loginRequest(email: string, password: string): Promise<{ accessToken: string; user: User }> {
+export async function loginRequest(email, password) {
   const res = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -41,24 +37,21 @@ export async function loginRequest(email: string, password: string): Promise<{ a
   return parseJsonOrThrow(res);
 }
 
-export async function refreshRequest(): Promise<{ accessToken: string; user: User | null }> {
+export async function refreshRequest() {
   const res = await fetch("/api/auth/refresh", { method: "POST" });
   return parseJsonOrThrow(res);
 }
 
-export async function logoutRequest(): Promise<void> {
+export async function logoutRequest() {
   await fetch("/api/auth/logout", { method: "POST" });
 }
 
-export async function fetchMe(accessToken: string): Promise<{ user: User }> {
+export async function fetchMe(accessToken) {
   const res = await fetch("/api/auth/me", { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
-export async function createAnalysis(
-  accessToken: string,
-  url: string,
-): Promise<{ jobId: string; repository: Repository }> {
+export async function createAnalysis(accessToken, url) {
   const res = await fetch("/api/analyses", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
@@ -67,17 +60,17 @@ export async function createAnalysis(
   return parseJsonOrThrow(res);
 }
 
-export async function getAnalysis(accessToken: string, id: string): Promise<AnalysisJobWithRepository> {
+export async function getAnalysis(accessToken, id) {
   const res = await fetch(`/api/analyses/${id}`, { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
-export async function listAnalyses(accessToken: string): Promise<{ jobs: AnalysisJob[] }> {
+export async function listAnalyses(accessToken) {
   const res = await fetch("/api/analyses", { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
-export async function uploadAvatar(accessToken: string, file: File): Promise<{ user: User }> {
+export async function uploadAvatar(accessToken, file) {
   const formData = new FormData();
   formData.append("avatar", file);
   const res = await fetch("/api/users/me/avatar", {

@@ -1,14 +1,13 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { ApiError, createAnalysis, getAnalysis } from "../api";
 import { useAuth } from "../auth/AuthContext";
 import { subscribeToJob } from "../socket";
-import type { AnalysisJobWithRepository, AnalysisStatus } from "../types";
 
-const STEPS: AnalysisStatus[] = ["pending", "fetching", "analyzing", "completed"];
+const STEPS = ["pending", "fetching", "analyzing", "completed"];
 
-const STEP_LABEL: Record<AnalysisStatus, string> = {
+const STEP_LABEL = {
   pending: "Queued",
   fetching: "Fetching repository",
   analyzing: "Analyzing with Claude",
@@ -16,7 +15,7 @@ const STEP_LABEL: Record<AnalysisStatus, string> = {
   failed: "Failed",
 };
 
-function ProgressSteps({ status }: { status: AnalysisStatus }) {
+function ProgressSteps({ status }) {
   const activeIndex = status === "failed" ? STEPS.length : STEPS.indexOf(status);
 
   return (
@@ -40,9 +39,9 @@ export function AnalyzerPage() {
   const { user, logout, withAuth } = useAuth();
   const [url, setUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [job, setJob] = useState<AnalysisJobWithRepository | null>(null);
+  const [formError, setFormError] = useState(null);
+  const [jobId, setJobId] = useState(null);
+  const [job, setJob] = useState(null);
 
   useEffect(() => {
     if (!jobId) return;
@@ -74,7 +73,7 @@ export function AnalyzerPage() {
     };
   }, [jobId, withAuth]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!url.trim() || submitting) return;
 

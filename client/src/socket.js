@@ -1,17 +1,11 @@
 import { io } from "socket.io-client";
-import type { AnalysisStatus } from "./types";
-
-export interface AnalysisProgressEvent {
-  jobId: string;
-  status: AnalysisStatus;
-}
 
 export const socket = io({ autoConnect: false });
 
-export function subscribeToJob(jobId: string, onProgress: (event: AnalysisProgressEvent) => void) {
+export function subscribeToJob(jobId, onProgress) {
   if (!socket.connected) socket.connect();
 
-  const handleProgress = (event: AnalysisProgressEvent) => {
+  const handleProgress = (event) => {
     if (event.jobId === jobId) onProgress(event);
   };
 
