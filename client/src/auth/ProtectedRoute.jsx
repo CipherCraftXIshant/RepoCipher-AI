@@ -6,7 +6,7 @@ export function ProtectedRoute() {
 
   if (status === "loading") {
     return (
-      <div className="page-loading">
+      <div className="flex items-center justify-center min-h-[60svh] text-text dark:text-text-dark">
         <p>Loading…</p>
       </div>
     );

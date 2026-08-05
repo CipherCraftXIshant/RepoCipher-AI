@@ -29,19 +29,28 @@ export function ProfilePage() {
   if (!user) return null;
 
   return (
-    <main className="page">
-      <nav className="topnav">
-        <Link to="/app" className="brand">RepoCipher AI</Link>
+    <main className="max-w-180 mx-auto pt-12 px-6 pb-20 text-left">
+      <nav className="flex items-center justify-between gap-4 mb-8">
+        <Link to="/app" className="flex items-center gap-2.5 font-semibold text-lg text-heading dark:text-heading-dark no-underline">
+          RepoCipher AI
+        </Link>
       </nav>
 
-      <section className="profile">
-        <div className="avatar-wrap">
+      <section className="flex flex-col items-center gap-4 py-8">
+        <div className="flex flex-col items-center gap-3">
           {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt="" className="avatar" />
+            <img src={user.avatarUrl} alt="" className="w-24 h-24 rounded-full object-cover border border-border dark:border-border-dark" />
           ) : (
-            <div className="avatar avatar-placeholder">{user.email[0]?.toUpperCase()}</div>
+            <div className="w-24 h-24 rounded-full object-cover border border-border dark:border-border-dark flex items-center justify-center bg-accent-bg dark:bg-accent-bg-dark text-heading dark:text-heading-dark text-[32px] font-semibold">
+              {user.email[0]?.toUpperCase()}
+            </div>
           )}
-          <button type="button" className="secondary" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+          <button
+            type="button"
+            className="[font:inherit] text-base px-5 py-3 rounded-lg border border-border dark:border-border-dark bg-transparent text-heading dark:text-heading-dark cursor-pointer whitespace-nowrap disabled:opacity-50 disabled:cursor-default"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
             {uploading ? "Uploading…" : "Change photo"}
           </button>
           <input
@@ -53,12 +62,14 @@ export function ProfilePage() {
           />
         </div>
 
-        <div className="profile-info">
-          <h2>{user.displayName ?? user.email}</h2>
-          <p className="repo-desc">{user.email}</p>
+        <div className="text-center">
+          <h2 className="text-xl lg:text-2xl font-medium text-heading dark:text-heading-dark leading-[118%] tracking-[-0.24px] mb-2">
+            {user.displayName ?? user.email}
+          </h2>
+          <p className="text-text dark:text-text-dark mt-1">{user.email}</p>
         </div>
 
-        {error && <p className="error-text">{error}</p>}
+        {error && <p className="text-danger mt-4">{error}</p>}
       </section>
     </main>
   );

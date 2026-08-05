@@ -9,13 +9,16 @@ const {
   storeRefreshToken,
   upsertGoogleUser,
 } = require("../models/user.model");
-const { toPublicUser } = require("../types/user");
+
+const { toPublicUser } = require("../serializers/user");
+
 const {
   generateRefreshToken,
   hashRefreshToken,
   refreshTokenExpiry,
   signAccessToken,
 } = require("../utils/jwt");
+
 const { comparePassword, hashPassword } = require("../utils/password");
 
 const REFRESH_COOKIE = "rt";

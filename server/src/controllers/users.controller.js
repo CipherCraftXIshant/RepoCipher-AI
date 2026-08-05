@@ -1,7 +1,7 @@
 const { HttpError } = require("../middleware/errorHandler");
 const { updateAvatarUrl } = require("../models/user.model");
 const { uploadAvatar } = require("../services/storage.service");
-const { toPublicUser } = require("../types/user");
+const { toPublicUser } = require("../serializers/user");
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 

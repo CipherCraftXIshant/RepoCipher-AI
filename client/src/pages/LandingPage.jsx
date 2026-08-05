@@ -104,104 +104,145 @@ const INSIGHTS = [
   },
 ];
 
+const METRIC_DELTA_TONE = {
+  good: "text-good",
+  neutral: "text-text dark:text-text-dark",
+};
+
 export function LandingPage() {
   const { status } = useAuth();
   const isAuthenticated = status === "authenticated";
 
   return (
-    <main className="landing">
-      <nav className="topnav">
-        <span className="brand">
-          <span className="brand-badge">
+    <main className="max-w-240 mx-auto pt-8 px-6 pb-24">
+      <nav className="flex items-center justify-between gap-4 mb-8">
+        <span className="flex items-center gap-2.5 font-semibold text-lg text-heading dark:text-heading-dark">
+          <span className="flex items-center justify-center w-8 h-8 rounded-[9px] bg-accent dark:bg-accent-dark text-white">
             <IconSparkle />
           </span>
           RepoCipher AI
         </span>
-        <div className="topnav-right">
+        <div className="flex items-center gap-5">
           {isAuthenticated ? (
-            <Link to="/app" className="cta-link">Open app</Link>
+            <Link
+              to="/app"
+              className="px-4 py-2 rounded-lg bg-accent-bg dark:bg-accent-bg-dark border border-accent-border dark:border-accent-border-dark text-heading dark:text-heading-dark no-underline"
+            >
+              Open app
+            </Link>
           ) : (
             <>
-              <Link to="/login">Log in</Link>
-              <Link to="/signup" className="cta-link">Sign up</Link>
+              <Link to="/login" className="text-heading dark:text-heading-dark no-underline">Log in</Link>
+              <Link
+                to="/signup"
+                className="px-4 py-2 rounded-lg bg-accent-bg dark:bg-accent-bg-dark border border-accent-border dark:border-accent-border-dark text-heading dark:text-heading-dark no-underline"
+              >
+                Sign up
+              </Link>
             </>
           )}
         </div>
       </nav>
 
-      <section className="hero">
-        <span className="eyebrow">
+      <section className="text-center pt-14 pb-10">
+        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-accent-bg dark:bg-accent-bg-dark border border-accent-border dark:border-accent-border-dark text-accent dark:text-accent-dark text-[13px] font-semibold mb-5">
           <IconSparkle />
           AI-powered repo onboarding
         </span>
-        <h1>Understand any GitHub repository in minutes, not days.</h1>
-        <p className="subtitle">
+        <h1 className="font-medium text-heading dark:text-heading-dark tracking-[-1.68px] max-w-180 mx-auto my-5 lg:my-8 text-[32px] min-[721px]:text-[48px]">
+          Understand any GitHub repository in minutes, not days.
+        </h1>
+        <p className="text-text dark:text-text-dark max-w-140 mx-auto mt-4 mb-8 text-lg">
           RepoCipher AI ingests a repo's structure and README, then hands it to Claude to write the
           onboarding doc you wish every project already had.
         </p>
-        <Link to={isAuthenticated ? "/app" : "/signup"} className="cta-button">
+        <Link
+          to={isAuthenticated ? "/app" : "/signup"}
+          className="inline-block px-7 py-3.5 rounded-[10px] bg-accent dark:bg-accent-dark border border-accent dark:border-accent-dark text-white no-underline text-base font-medium shadow-card dark:shadow-card-dark"
+        >
           {isAuthenticated ? "Analyze a repo" : "Get started free"}
         </Link>
       </section>
 
-      <section className="metrics-grid">
+      <section className="grid grid-cols-4 max-[720px]:grid-cols-2 max-[480px]:grid-cols-1 gap-4 pt-2 pb-10">
         {METRICS.map((m) => (
-          <div className="metric-card" key={m.label}>
-            <span className="metric-label">{m.label}</span>
-            <div className="metric-value-row">
-              <span className="metric-value">{m.value}</span>
+          <div className="p-5 border border-border dark:border-border-dark rounded-2xl bg-bg dark:bg-bg-dark shadow-card dark:shadow-card-dark" key={m.label}>
+            <span className="block text-sm text-text dark:text-text-dark mb-2.5">{m.label}</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[26px] font-semibold text-heading dark:text-heading-dark tracking-[-0.3px]">{m.value}</span>
               {m.delta && (
-                <span className={`metric-delta metric-delta-${m.deltaTone}`}>{m.delta}</span>
+                <span className={`text-[13px] font-semibold ${METRIC_DELTA_TONE[m.deltaTone]}`}>{m.delta}</span>
               )}
             </div>
-            <p className="metric-note">
-              <IconSparkle className="metric-note-icon" />
+            <p className="flex items-start gap-1.5 mt-3.5 text-[13px] text-text dark:text-text-dark leading-[140%]">
+              <IconSparkle className="shrink-0 mt-0.5 text-accent dark:text-accent-dark" />
               {m.note}
             </p>
           </div>
         ))}
       </section>
 
-      <section className="insights-panel">
-        <div className="insights-header">
-          <h2>
-            <IconSparkle className="insights-header-icon" />
+      <section className="border border-border dark:border-border-dark rounded-2xl shadow-card dark:shadow-card-dark p-6 mb-10">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h2 className="flex items-center gap-2 m-0 text-xl lg:text-2xl font-medium text-heading dark:text-heading-dark leading-[118%] tracking-[-0.24px]">
+            <IconSparkle className="text-accent dark:text-accent-dark" />
             What Claude finds for you
           </h2>
-          <span className="insights-example-tag">Example output</span>
+          <span className="shrink-0 text-xs font-medium text-text dark:text-text-dark px-2.5 py-1 border border-border dark:border-border-dark rounded-full">
+            Example output
+          </span>
         </div>
-        <ul className="insights-list">
+        <ul className="list-none m-0 p-0 flex flex-col">
           {INSIGHTS.map(({ icon: Icon, text, tag }) => (
-            <li key={text} className="insights-row">
-              <span className="insights-icon">
+            <li
+              key={text}
+              className="flex items-center max-[720px]:items-start gap-3.5 py-4 border-t border-border dark:border-border-dark first:border-t-0"
+            >
+              <span className="shrink-0 w-9 h-9 rounded-full border border-border dark:border-border-dark flex items-center justify-center text-text dark:text-text-dark">
                 <Icon />
               </span>
-              <p className="insights-text">{text}</p>
-              <span className="insights-tag">{tag}</span>
+              <p className="flex-1 text-[15px] text-heading dark:text-heading-dark">{text}</p>
+              <span className="shrink-0 max-[720px]:hidden text-[13px] font-medium px-3 py-1.5 rounded-full bg-accent-bg dark:bg-accent-bg-dark text-accent dark:text-accent-dark">
+                {tag}
+              </span>
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="how-it-works">
-        <h2>How it works</h2>
-        <ol className="steps-explainer">
+      <section className="py-8 border-t border-border dark:border-border-dark">
+        <h2 className="text-center mb-8 text-xl lg:text-2xl font-medium text-heading dark:text-heading-dark leading-[118%] tracking-[-0.24px]">
+          How it works
+        </h2>
+        <ol className="list-none p-0 m-0 grid grid-cols-3 max-[720px]:grid-cols-1 gap-6">
           {STEPS.map((step, i) => (
-            <li key={step.title}>
-              <span className="step-number">{i + 1}</span>
+            <li
+              key={step.title}
+              className="flex gap-3 items-start p-5 border border-border dark:border-border-dark rounded-2xl shadow-card dark:shadow-card-dark"
+            >
+              <span className="shrink-0 w-7 h-7 rounded-full bg-accent-bg dark:bg-accent-bg-dark border border-accent-border dark:border-accent-border-dark text-accent dark:text-accent-dark flex items-center justify-center text-sm font-semibold">
+                {i + 1}
+              </span>
               <div>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
+                <h3 className="m-0 mb-1 text-base text-left">{step.title}</h3>
+                <p className="text-text dark:text-text-dark text-[15px]">{step.body}</p>
               </div>
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="final-cta">
-        <h2>Stop reading code cold.</h2>
-        <p>Paste a repo, get an onboarding doc back before your coffee cools.</p>
-        <Link to={isAuthenticated ? "/app" : "/signup"} className="cta-button">
+      <section className="text-center py-14 px-6 mt-6 border border-border dark:border-border-dark rounded-[20px] bg-accent-bg dark:bg-accent-bg-dark">
+        <h2 className="text-center text-xl lg:text-2xl font-medium text-heading dark:text-heading-dark leading-[118%] tracking-[-0.24px]">
+          Stop reading code cold.
+        </h2>
+        <p className="text-text dark:text-text-dark mt-2 mb-6">
+          Paste a repo, get an onboarding doc back before your coffee cools.
+        </p>
+        <Link
+          to={isAuthenticated ? "/app" : "/signup"}
+          className="inline-block px-7 py-3.5 rounded-[10px] bg-accent dark:bg-accent-dark border border-accent dark:border-accent-dark text-white no-underline text-base font-medium shadow-card dark:shadow-card-dark"
+        >
           {isAuthenticated ? "Analyze a repo" : "Get started free"}
         </Link>
       </section>

@@ -17,7 +17,7 @@ export function AuthCallbackPage() {
   if (done) return <Navigate to="/app" replace />;
 
   return (
-    <div className="page-loading">
+    <div className="flex items-center justify-center min-h-[60svh] text-text dark:text-text-dark">
       <p>Signing you in…</p>
     </div>
   );
