@@ -4,11 +4,11 @@ import { IconArrowRight, IconLoader } from "./Icons";
 
 const VARIANTS = {
   primary:
-    "bg-accent-dark text-[#0b0710] border border-accent-dark shadow-[0_1px_0_0_rgb(255_255_255_/_0.25)_inset,0_8px_24px_-8px_rgb(192_132_252_/_0.55)] hover:shadow-[0_1px_0_0_rgb(255_255_255_/_0.3)_inset,0_12px_32px_-8px_rgb(192_132_252_/_0.7)] hover:-translate-y-0.5 active:translate-y-0",
+    "bg-accent-dark text-[#0b0710] border border-accent-dark shadow-[0_1px_0_0_rgb(255_255_255/0.25)_inset,0_8px_24px_-8px_rgb(192_132_252/0.55)] hover:shadow-[0_1px_0_0_rgb(255_255_255/0.3)_inset,0_12px_32px_-8px_rgb(192_132_252/0.7)] hover:-translate-y-0.5 active:translate-y-0",
   secondary:
-    "bg-white/[0.04] text-heading-dark border border-white/10 hover:bg-white/[0.08] hover:border-white/20 hover:-translate-y-0.5 active:translate-y-0",
+    "bg-white/4 text-heading-dark border border-white/10 hover:bg-white/8 hover:border-white/20 hover:-translate-y-0.5 active:translate-y-0",
   ghost:
-    "bg-transparent text-text-dark border border-transparent hover:text-heading-dark hover:bg-white/[0.05]",
+    "bg-transparent text-text-dark border border-transparent hover:text-heading-dark hover:bg-white/5",
 };
 
 const SIZES = {
