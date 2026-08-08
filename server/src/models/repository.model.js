@@ -26,7 +26,7 @@ const analysisJobSchema = new Schema(
     summary: { type: String, default: null },
   },
   { timestamps: true },
-  
+
 );
 
 const AnalysisJobModel = model("AnalysisJob", analysisJobSchema);
