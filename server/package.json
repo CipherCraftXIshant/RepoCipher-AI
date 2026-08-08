@@ -3,10 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "description": "RepoCipher AI server",
-  "main": "src/index.js",
+  "main": "server.js",
   "scripts": {
-    "dev": "node --watch src/index.js",
-    "start": "node src/index.js"
+    "dev": "npx nodemon server.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
