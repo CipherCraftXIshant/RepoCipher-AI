@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { ApiError, createAnalysis, getAnalysis } from "../api";
 import { useAuth } from "../auth/AuthContext";
+import { AnalysisTabs } from "../components/dashboard/AnalysisTabs";
 import { subscribeToJob } from "../socket";
 
 const STEPS = ["pending", "fetching", "analyzing", "completed"];
@@ -10,7 +10,7 @@ const STEPS = ["pending", "fetching", "analyzing", "completed"];
 const STEP_LABEL = {
   pending: "Queued",
   fetching: "Fetching repository",
-  analyzing: "Analyzing with Claude",
+  analyzing: "Analyzing with Gemini",
   completed: "Completed",
   failed: "Failed",
 };
@@ -27,13 +27,6 @@ const STEP_DOT_CLASS = {
   active: "border-accent dark:border-accent-dark shadow-focus dark:shadow-focus-dark",
   failed: "bg-danger border-danger",
   upcoming: "",
-};
-
-const MARKDOWN_COMPONENTS = {
-  h1: (props) => <h1 className="text-left text-[32px] lg:text-[36px] font-medium text-heading dark:text-heading-dark my-5 lg:my-8" {...props} />,
-  h2: (props) => <h2 className="text-left text-xl lg:text-2xl font-medium text-heading dark:text-heading-dark leading-[118%] tracking-[-0.24px] mb-2" {...props} />,
-  h3: (props) => <h3 className="text-left text-lg font-medium text-heading dark:text-heading-dark mb-2" {...props} />,
-  pre: (props) => <pre className="bg-code dark:bg-code-dark px-4 py-3 rounded-lg overflow-x-auto" {...props} />,
 };
 
 function ProgressSteps({ status }) {
@@ -191,11 +184,7 @@ export function AnalyzerPage() {
             <p className="text-danger mt-4">Analysis failed: {job.error ?? "Unknown error"}</p>
           )}
 
-          {job.status === "completed" && job.summary && (
-            <article className="mt-8 leading-[155%]">
-              <ReactMarkdown components={MARKDOWN_COMPONENTS}>{job.summary}</ReactMarkdown>
-            </article>
-          )}
+          {job.status === "completed" && job.analysis && <AnalysisTabs analysis={job.analysis} />}
         </section>
       )}
     </main>

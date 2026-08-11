@@ -12,6 +12,19 @@ repositorySchema.index({ owner: 1, name: 1 }, { unique: true });
 
 const RepositoryModel = model("Repository", repositorySchema);
 
+const analysisSchema = new Schema(
+  {
+    overview: { type: String, default: null },
+    stack: { type: [{ name: String, role: String }], default: [] },
+    architecture: { type: [{ label: String, description: String }], default: [] },
+    entryPoints: { type: [{ path: String, note: String }], default: [] },
+    dependencies: { type: [{ name: String, version: String, role: String }], default: [] },
+    directories: { type: [{ path: String, note: String }], default: [] },
+    setup: { type: String, default: null },
+  },
+  { _id: false },
+);
+
 const analysisJobSchema = new Schema(
   {
     repositoryId: { type: Schema.Types.ObjectId, ref: "Repository", required: true, index: true },
@@ -23,7 +36,7 @@ const analysisJobSchema = new Schema(
     },
     error: { type: String, default: null },
     fileCount: { type: Number, default: null },
-    summary: { type: String, default: null },
+    analysis: { type: analysisSchema, default: null },
   },
   { timestamps: true },
 
@@ -51,7 +64,7 @@ function toAnalysisJob(doc) {
     status: doc.status,
     error: doc.error,
     fileCount: doc.fileCount,
-    summary: doc.summary,
+    analysis: doc.analysis,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
@@ -87,7 +100,7 @@ async function updateAnalysisJob(id, fields) {
   if (fields.status !== undefined) update.status = fields.status;
   if (fields.error !== undefined) update.error = fields.error;
   if (fields.fileCount !== undefined) update.fileCount = fields.fileCount;
-  if (fields.summary !== undefined) update.summary = fields.summary;
+  if (fields.analysis !== undefined) update.analysis = fields.analysis;
 
   await AnalysisJobModel.updateOne({ _id: id }, { $set: update });
 }
@@ -104,7 +117,7 @@ async function getAnalysisJobWithRepository(id, userId) {
     status: doc.status,
     error: doc.error,
     fileCount: doc.fileCount,
-    summary: doc.summary,
+    analysis: doc.analysis,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
     repository,

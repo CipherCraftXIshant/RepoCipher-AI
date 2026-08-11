@@ -67,4 +67,15 @@ async function fetchFileContent(ref, path, branch) {
   return Buffer.from(data.content, "base64").toString("utf-8");
 }
 
-module.exports = { parseGithubUrl, fetchRepoMetadata, fetchRepoTree, fetchFileContent };
+async function fetchRepoLanguages(ref) {
+  const res = await githubFetch(`/repos/${ref.owner}/${ref.repo}/languages`);
+  return res.json();
+}
+
+module.exports = {
+  parseGithubUrl,
+  fetchRepoMetadata,
+  fetchRepoTree,
+  fetchFileContent,
+  fetchRepoLanguages,
+};

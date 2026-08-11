@@ -2,9 +2,16 @@ const { Worker } = require("bullmq");
 const { createRedisConnection } = require("../config/redis");
 const { logger } = require("../config/logger");
 const { updateAnalysisJob } = require("../models/repository.model");
-const { summarizeRepository } = require("../services/gemini.service");
-const { fetchFileContent, fetchRepoMetadata, fetchRepoTree } = require("../utils/github");
+const { analyzeRepository } = require("../services/gemini.service");
+const {
+  fetchFileContent,
+  fetchRepoLanguages,
+  fetchRepoMetadata,
+  fetchRepoTree,
+} = require("../utils/github");
 const { INGESTION_QUEUE_NAME } = require("./ingestion.queue");
+
+const MANIFEST_CANDIDATES = /^(package\.json|requirements\.txt|pyproject\.toml|go\.mod|Cargo\.toml)$/;
 
 function createIngestionWorker(io) {
   const emitProgress = (jobId, status) => {
@@ -30,12 +37,18 @@ function createIngestionWorker(io) {
           ? await fetchFileContent(ref, readmePath, metadata.defaultBranch).catch(() => null)
           : null;
 
+        const languages = await fetchRepoLanguages(ref).catch(() => ({}));
+        const manifestPath = tree.find((entry) => MANIFEST_CANDIDATES.test(entry.path))?.path;
+        const manifest = manifestPath
+          ? await fetchFileContent(ref, manifestPath, metadata.defaultBranch).catch(() => null)
+          : null;
+
         await updateAnalysisJob(jobId, { status: "analyzing", fileCount: filePaths.length });
         emitProgress(jobId, "analyzing");
 
-        const summary = await summarizeRepository({ metadata, filePaths, readme });
+        const analysis = await analyzeRepository({ metadata, filePaths, readme, languages, manifest });
 
-        await updateAnalysisJob(jobId, { status: "completed", summary });
+        await updateAnalysisJob(jobId, { status: "completed", analysis });
         emitProgress(jobId, "completed");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
