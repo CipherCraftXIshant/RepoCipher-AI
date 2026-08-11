@@ -2,7 +2,7 @@ const { Worker } = require("bullmq");
 const { createRedisConnection } = require("../config/redis");
 const { logger } = require("../config/logger");
 const { updateAnalysisJob } = require("../models/repository.model");
-const { summarizeRepository } = require("../services/anthropic.service");
+const { summarizeRepository } = require("../services/gemini.service");
 const { fetchFileContent, fetchRepoMetadata, fetchRepoTree } = require("../utils/github");
 const { INGESTION_QUEUE_NAME } = require("./ingestion.queue");
 

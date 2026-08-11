@@ -15,7 +15,7 @@ const env = {
   clientUrl: process.env.CLIENT_URL ?? required("CORS_ORIGIN", "http://localhost:5173"),
   mongoUri: required("MONGODB_URI"),
   redisUrl: required("REDIS_URL"),
-  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
   githubToken: process.env.GITHUB_TOKEN ?? "",
 
   jwtAccessSecret: required("JWT_ACCESS_SECRET"),
