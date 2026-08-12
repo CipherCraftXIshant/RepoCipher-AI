@@ -6,7 +6,15 @@ function EmptyState({ label }) {
   return <p className="text-sm text-text dark:text-text-dark">No {label} found for this repository.</p>;
 }
 
-export function AnalysisPanelContent({ tabId, analysis }) {
+const SEVERITY_CLASS = {
+  risk: "border-l-danger",
+  warning: "border-l-[#d4a017] dark:border-l-[#e0b32e]",
+  info: "border-l-accent dark:border-l-accent-dark",
+};
+
+const LANGUAGE_BAR_OPACITY = [1, 0.85, 0.7, 0.55, 0.45, 0.35];
+
+export function AnalysisPanelContent({ tabId, analysis, languages }) {
   if (!analysis) return <EmptyState label="analysis" />;
 
   if (tabId === "stack") {

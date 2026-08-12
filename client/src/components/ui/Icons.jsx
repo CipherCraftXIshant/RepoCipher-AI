@@ -160,6 +160,14 @@ export function IconLoader(props) {
   );
 }
 
+export function IconChart(props) {
+  return (
+    <svg {...base(props, { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" })}>
+      <path d="M4 20V10M11 20V4M18 20v-7" />
+    </svg>
+  );
+}
+
 export function IconAlert(props) {
   return (
     <svg {...base(props, { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" })}>

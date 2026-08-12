@@ -1,8 +1,10 @@
 const { HttpError } = require("../middleware/errorHandler");
 const {
   createAnalysisJob,
+  deleteAnalysisJob,
   getAnalysisJobWithRepository,
   listAnalysisJobsForUser,
+  touchLastViewed,
   upsertRepository,
 } = require("../models/repository.model");
 const { ingestionQueue } = require("../queues/ingestion.queue");
@@ -29,7 +31,13 @@ async function createAnalysis(req, res) {
   });
 
   const job = await createAnalysisJob(repository.id, req.userId);
-  await ingestionQueue.add("ingest", { jobId: job.id, owner: ref.owner, repo: ref.repo });
+  await ingestionQueue.add("ingest", {
+    jobId: job.id,
+    owner: ref.owner,
+    repo: ref.repo,
+    repositoryId: repository.id,
+    userId: req.userId,
+  });
 
   res.status(202).json({ jobId: job.id, repository });
 }
@@ -47,4 +55,18 @@ async function listMyAnalyses(req, res) {
   res.json({ jobs });
 }
 
-module.exports = { createAnalysis, getAnalysis, listMyAnalyses };
+async function deleteAnalysis(req, res) {
+  const deleted = await deleteAnalysisJob(req.params.id, req.userId);
+  if (!deleted) {
+    throw new HttpError(404, "Analysis job not found");
+  }
+  res.status(204).end();
+}
+
+async function touchAnalysisView(req, res) {
+  const { tab } = req.body ?? {};
+  await touchLastViewed(req.params.id, req.userId, typeof tab === "string" ? tab : null);
+  res.status(204).end();
+}
+
+module.exports = { createAnalysis, deleteAnalysis, getAnalysis, listMyAnalyses, touchAnalysisView };

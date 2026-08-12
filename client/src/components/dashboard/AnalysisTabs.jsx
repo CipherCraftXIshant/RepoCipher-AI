@@ -1,5 +1,17 @@
-import { useState } from "react";
-import { IconBox, IconBranch, IconFile, IconFolder, IconLayers, IconSparkle, IconTerminal } from "../ui/Icons";
+import { useEffect, useState } from "react";
+import {
+  IconAlert,
+  IconBox,
+  IconBranch,
+  IconChart,
+  IconFile,
+  IconFolder,
+  IconLayers,
+  IconMessage,
+  IconSparkle,
+  IconTerminal,
+} from "../ui/Icons";
+import { ChatPanel } from "../chat/ChatPanel";
 import { AnalysisPanelContent } from "./AnalysisPanelContent";
 
 const ANALYSIS_TABS = [
@@ -9,12 +21,20 @@ const ANALYSIS_TABS = [
   { id: "entry-points", label: "Entry Points", icon: IconFile, description: "The handful of files that show you how the whole app boots." },
   { id: "dependencies", label: "Dependencies", icon: IconBox, description: "Key third-party packages and the role each one plays." },
   { id: "directories", label: "Key Directories", icon: IconFolder, description: "Important folders and what lives in each one." },
+  { id: "risks", label: "Code Quality & Risks", icon: IconAlert, description: "Observations on testing, tooling, and other risk signals found in the repository." },
+  { id: "languages", label: "Languages", icon: IconChart, description: "Composition of the codebase by language, by bytes." },
   { id: "setup", label: "Setup & Run", icon: IconTerminal, description: "How to install and run this project locally." },
+  { id: "chat", label: "Repo Chat", icon: IconMessage, description: "Ask questions about this repository — answers are grounded in the analysis above." },
 ];
 
-export function AnalysisTabs({ analysis }) {
-  const [activeTab, setActiveTab] = useState(ANALYSIS_TABS[0].id);
+export function AnalysisTabs({ analysis, languages, jobId, onTabChange, initialTab }) {
+  const [activeTab, setActiveTab] = useState(initialTab ?? ANALYSIS_TABS[0].id);
   const active = ANALYSIS_TABS.find((tab) => tab.id === activeTab) ?? ANALYSIS_TABS[0];
+
+  useEffect(() => {
+    onTabChange?.(activeTab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   return (
     <div className="grid md:grid-cols-[240px_1fr] rounded-2xl border border-border dark:border-border-dark bg-bg dark:bg-bg-dark overflow-hidden mt-8">
@@ -49,7 +69,11 @@ export function AnalysisTabs({ analysis }) {
         <h3 className="text-lg font-medium text-heading dark:text-heading-dark mb-1.5">{active.label}</h3>
         <p className="text-sm text-text dark:text-text-dark mb-6">{active.description}</p>
         <div key={active.id}>
-          <AnalysisPanelContent tabId={active.id} analysis={analysis} />
+          {active.id === "chat" ? (
+            <ChatPanel jobId={jobId} />
+          ) : (
+            <AnalysisPanelContent tabId={active.id} analysis={analysis} languages={languages} />
+          )}
         </div>
       </div>
     </div>

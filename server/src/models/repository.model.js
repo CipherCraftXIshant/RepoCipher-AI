@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 
 const repositorySchema = new Schema({
   owner: { type: String, required: true },
@@ -6,6 +6,14 @@ const repositorySchema = new Schema({
   fullName: { type: String, required: true },
   defaultBranch: { type: String, default: null },
   description: { type: String, default: null },
+  stars: { type: Number, default: null },
+  forks: { type: Number, default: null },
+  openIssues: { type: Number, default: null },
+  watchers: { type: Number, default: null },
+  license: { type: String, default: null },
+  pushedAt: { type: Date, default: null },
+  contributorsCount: { type: Number, default: null },
+  languages: { type: Schema.Types.Mixed, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 repositorySchema.index({ owner: 1, name: 1 }, { unique: true });
@@ -19,8 +27,12 @@ const analysisSchema = new Schema(
     architecture: { type: [{ label: String, description: String }], default: [] },
     entryPoints: { type: [{ path: String, note: String }], default: [] },
     dependencies: { type: [{ name: String, version: String, role: String }], default: [] },
-    directories: { type: [{ path: String, note: String }], default: [] },
+    directories: {
+      type: [{ path: String, note: String, files: { type: [{ path: String, note: String }], default: [] } }],
+      default: [],
+    },
     setup: { type: String, default: null },
+    risks: { type: [{ title: String, severity: String, description: String }], default: [] },
   },
   { _id: false },
 );
@@ -37,6 +49,9 @@ const analysisJobSchema = new Schema(
     error: { type: String, default: null },
     fileCount: { type: Number, default: null },
     analysis: { type: analysisSchema, default: null },
+    healthScore: { type: Number, default: null },
+    lastViewedAt: { type: Date, default: null },
+    lastViewedTab: { type: String, default: null },
   },
   { timestamps: true },
 
@@ -52,21 +67,34 @@ function toRepository(doc) {
     fullName: doc.fullName,
     defaultBranch: doc.defaultBranch,
     description: doc.description,
+    stars: doc.stars,
+    forks: doc.forks,
+    openIssues: doc.openIssues,
+    watchers: doc.watchers,
+    license: doc.license,
+    pushedAt: doc.pushedAt,
+    contributorsCount: doc.contributorsCount,
+    languages: doc.languages,
     createdAt: doc.createdAt,
   };
 }
 
 function toAnalysisJob(doc) {
+  const repositoryPopulated = doc.repositoryId && typeof doc.repositoryId === "object" && doc.repositoryId.owner;
   return {
     id: doc.id,
-    repositoryId: doc.repositoryId.toString(),
+    repositoryId: repositoryPopulated ? doc.repositoryId.id : doc.repositoryId.toString(),
     userId: doc.userId.toString(),
     status: doc.status,
     error: doc.error,
     fileCount: doc.fileCount,
     analysis: doc.analysis,
+    healthScore: doc.healthScore,
+    lastViewedAt: doc.lastViewedAt,
+    lastViewedTab: doc.lastViewedTab,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
+    ...(repositoryPopulated ? { repository: toRepository(doc.repositoryId) } : {}),
   };
 }
 
@@ -78,6 +106,14 @@ async function upsertRepository(params) {
         fullName: params.fullName,
         defaultBranch: params.defaultBranch,
         description: params.description,
+        stars: params.stars,
+        forks: params.forks,
+        openIssues: params.openIssues,
+        watchers: params.watchers,
+        license: params.license,
+        pushedAt: params.pushedAt,
+        contributorsCount: params.contributorsCount,
+        languages: params.languages,
       },
     },
     { new: true, upsert: true },
@@ -91,7 +127,7 @@ async function createAnalysisJob(repositoryId, userId) {
 }
 
 async function listAnalysisJobsForUser(userId) {
-  const docs = await AnalysisJobModel.find({ userId }).sort({ createdAt: -1 });
+  const docs = await AnalysisJobModel.find({ userId }).sort({ updatedAt: -1 }).populate("repositoryId");
   return docs.map(toAnalysisJob);
 }
 
@@ -101,6 +137,7 @@ async function updateAnalysisJob(id, fields) {
   if (fields.error !== undefined) update.error = fields.error;
   if (fields.fileCount !== undefined) update.fileCount = fields.fileCount;
   if (fields.analysis !== undefined) update.analysis = fields.analysis;
+  if (fields.healthScore !== undefined) update.healthScore = fields.healthScore;
 
   await AnalysisJobModel.updateOne({ _id: id }, { $set: update });
 }
@@ -108,19 +145,44 @@ async function updateAnalysisJob(id, fields) {
 async function getAnalysisJobWithRepository(id, userId) {
   const doc = await AnalysisJobModel.findOne({ _id: id, userId }).populate("repositoryId");
   if (!doc) return null;
+  return toAnalysisJob(doc);
+}
 
-  const repository = toRepository(doc.repositoryId);
+async function deleteAnalysisJob(id, userId) {
+  const result = await AnalysisJobModel.deleteOne({ _id: id, userId });
+  return result.deletedCount > 0;
+}
+
+async function touchLastViewed(id, userId, tab) {
+  await AnalysisJobModel.updateOne(
+    { _id: id, userId },
+    { $set: { lastViewedAt: new Date(), ...(tab ? { lastViewedTab: tab } : {}) } },
+  );
+}
+
+async function findMostRecentlyViewedJob(userId) {
+  const doc = await AnalysisJobModel.findOne({ userId, status: "completed", lastViewedAt: { $ne: null } })
+    .sort({ lastViewedAt: -1 })
+    .populate("repositoryId");
+  return doc ? toAnalysisJob(doc) : null;
+}
+
+async function getUserAnalysisStats(userId) {
+  const uid = Types.ObjectId.createFromHexString(userId);
+
+  const [repoCount, totalAnalyses, healthAgg] = await Promise.all([
+    AnalysisJobModel.distinct("repositoryId", { userId: uid }).then((ids) => ids.length),
+    AnalysisJobModel.countDocuments({ userId: uid }),
+    AnalysisJobModel.aggregate([
+      { $match: { userId: uid, status: "completed", healthScore: { $ne: null } } },
+      { $group: { _id: null, avg: { $avg: "$healthScore" } } },
+    ]),
+  ]);
+
   return {
-    id: doc.id,
-    repositoryId: repository.id,
-    userId: doc.userId.toString(),
-    status: doc.status,
-    error: doc.error,
-    fileCount: doc.fileCount,
-    analysis: doc.analysis,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
-    repository,
+    repoCount,
+    totalAnalyses,
+    avgHealth: healthAgg[0] ? Math.round(healthAgg[0].avg) : null,
   };
 }
 
@@ -130,4 +192,8 @@ module.exports = {
   listAnalysisJobsForUser,
   updateAnalysisJob,
   getAnalysisJobWithRepository,
+  deleteAnalysisJob,
+  touchLastViewed,
+  findMostRecentlyViewedJob,
+  getUserAnalysisStats,
 };

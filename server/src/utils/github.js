@@ -49,7 +49,27 @@ async function fetchRepoMetadata(ref) {
     fullName: data.full_name,
     defaultBranch: data.default_branch,
     description: data.description ?? null,
+    stars: data.stargazers_count ?? 0,
+    forks: data.forks_count ?? 0,
+    openIssues: data.open_issues_count ?? 0,
+    watchers: data.subscribers_count ?? 0,
+    license: data.license?.name ?? null,
+    pushedAt: data.pushed_at ?? null,
   };
+}
+
+function parseLastPageFromLinkHeader(linkHeader) {
+  if (!linkHeader) return null;
+  const match = linkHeader.match(/<[^>]*[?&]page=(\d+)[^>]*>;\s*rel="last"/);
+  return match ? Number(match[1]) : null;
+}
+
+async function fetchContributorsCount(ref) {
+  const res = await githubFetch(`/repos/${ref.owner}/${ref.repo}/contributors?per_page=1&anon=true`);
+  const lastPage = parseLastPageFromLinkHeader(res.headers.get("link"));
+  if (lastPage !== null) return lastPage;
+  const data = await res.json();
+  return Array.isArray(data) ? data.length : null;
 }
 
 async function fetchRepoTree(ref, branch) {
@@ -78,4 +98,5 @@ module.exports = {
   fetchRepoTree,
   fetchFileContent,
   fetchRepoLanguages,
+  fetchContributorsCount,
 };
