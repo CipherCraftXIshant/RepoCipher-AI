@@ -4,7 +4,7 @@ const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true, lowercase: true },
     passwordHash: { type: String, default: null },
-    googleId: { type: String, default: null, unique: true, sparse: true },
+    googleId: { type: String, index: { unique: true, sparse: true } },
     displayName: { type: String, default: null },
     avatarUrl: { type: String, default: null },
   },
@@ -52,6 +52,7 @@ async function findUserById(id) {
 }
 
 async function findUserByGoogleId(googleId) {
+  if (!googleId) return null;
   const doc = await UserModel.findOne({ googleId });
   return doc ? toUser(doc) : null;
 }
@@ -104,6 +105,7 @@ async function revokeRefreshToken(tokenHash) {
 }
 
 module.exports = {
+  UserModel,
   createUserWithPassword,
   findUserByEmail,
   findUserById,

@@ -9,6 +9,15 @@ mongoose.connection.on("error", (err) => {
 async function connectDb() {
   await mongoose.connect(env.mongoUri);
   logger.info("Connected to MongoDB");
+
+  try {
+    const { UserModel } = require("../models/user.model");
+    if (UserModel) {
+      await UserModel.syncIndexes();
+    }
+  } catch (err) {
+    logger.warn({ err }, "Could not auto-sync MongoDB indexes");
+  }
 }
 
 module.exports = { connectDb };

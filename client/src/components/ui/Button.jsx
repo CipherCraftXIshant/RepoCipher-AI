@@ -1,32 +1,41 @@
 import { forwardRef } from "react";
 import { Link } from "react-router-dom";
-import { IconArrowRight, IconLoader } from "./Icons";
+import { cn } from "../../lib/utils";
+import { Loader2, ArrowRight } from "lucide-react";
 
 const VARIANTS = {
+  default:
+    "bg-primary hover:bg-accent-hover text-white shadow-sm border border-transparent active:scale-[0.98]",
   primary:
-    "bg-accent-dark text-[#0b0710] border border-accent-dark shadow-[0_1px_0_0_rgb(255_255_255/0.25)_inset,0_8px_24px_-8px_rgb(192_132_252/0.55)] hover:shadow-[0_1px_0_0_rgb(255_255_255/0.3)_inset,0_12px_32px_-8px_rgb(192_132_252/0.7)] hover:-translate-y-0.5 active:translate-y-0",
+    "bg-primary hover:bg-accent-hover text-white shadow-sm border border-transparent active:scale-[0.98]",
   secondary:
-    "bg-white/4 text-heading-dark border border-white/10 hover:bg-white/8 hover:border-white/20 hover:-translate-y-0.5 active:translate-y-0",
+    "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200/80 active:scale-[0.98]",
+  outline:
+    "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 shadow-subtle active:scale-[0.98]",
   ghost:
-    "bg-transparent text-text-dark border border-transparent hover:text-heading-dark hover:bg-white/5",
+    "bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 border border-transparent",
+  destructive:
+    "bg-danger-500 hover:bg-danger-600 text-white shadow-sm active:scale-[0.98]",
+  subtle:
+    "bg-primary-50 text-primary-700 hover:bg-primary-100 border border-primary-200/60",
 };
 
 const SIZES = {
-  md: "text-sm px-4 py-2.5 gap-1.5",
-  lg: "text-base px-6 py-3.5 gap-2",
+  xs: "text-xs px-2.5 py-1.5 gap-1 rounded-lg",
+  sm: "text-xs font-medium px-3 py-1.5 gap-1.5 rounded-lg",
+  md: "text-sm font-medium px-3.5 py-2 gap-1.5 rounded-xl",
+  lg: "text-sm font-semibold px-4.5 py-2.5 gap-2 rounded-xl",
+  icon: "h-9 w-9 p-0 rounded-xl flex items-center justify-center shrink-0",
+  "icon-sm": "h-7.5 w-7.5 p-0 rounded-lg flex items-center justify-center shrink-0",
 };
 
-/**
- * Shared CTA button. Renders a router `Link`, a plain `a`, or a `button`
- * depending on which of `to` / `href` is supplied.
- */
 export const Button = forwardRef(function Button(
   {
     as,
     to,
     href,
-    variant = "primary",
-    size = "lg",
+    variant = "default",
+    size = "md",
     loading = false,
     showArrow = false,
     className = "",
@@ -35,16 +44,21 @@ export const Button = forwardRef(function Button(
     type = "button",
     ...props
   },
-  ref,
+  ref
 ) {
-  const classes = `group relative inline-flex items-center justify-center rounded-xl font-medium whitespace-nowrap transition-all duration-200 ease-out no-underline cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-dark/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-dark ${VARIANTS[variant]} ${SIZES[size]} ${className}`;
+  const classes = cn(
+    "group relative inline-flex items-center justify-center font-medium whitespace-nowrap transition-all duration-150 ease-out no-underline cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 select-none",
+    VARIANTS[variant] || VARIANTS.default,
+    SIZES[size] || SIZES.md,
+    className
+  );
 
   const content = (
     <>
-      {loading && <IconLoader width={16} height={16} />}
-      <span>{children}</span>
+      {loading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
+      {children}
       {showArrow && !loading && (
-        <IconArrowRight width={16} height={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+        <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 ml-1 shrink-0" />
       )}
     </>
   );
@@ -68,7 +82,13 @@ export const Button = forwardRef(function Button(
   }
 
   return (
-    <button ref={ref} type={type} className={classes} disabled={disabled || loading} {...props}>
+    <button
+      ref={ref}
+      type={type}
+      className={classes}
+      disabled={disabled || loading}
+      {...props}
+    >
       {content}
     </button>
   );
