@@ -52,6 +52,10 @@ const analysisJobSchema = new Schema(
     healthScore: { type: Number, default: null },
     lastViewedAt: { type: Date, default: null },
     lastViewedTab: { type: String, default: null },
+    interviewQuestions: {
+      type: [{ category: String, question: String, answer: String }],
+      default: null,
+    },
   },
   { timestamps: true },
 
@@ -92,6 +96,7 @@ function toAnalysisJob(doc) {
     healthScore: doc.healthScore,
     lastViewedAt: doc.lastViewedAt,
     lastViewedTab: doc.lastViewedTab,
+    interviewQuestions: doc.interviewQuestions,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
     ...(repositoryPopulated ? { repository: toRepository(doc.repositoryId) } : {}),
@@ -138,6 +143,7 @@ async function updateAnalysisJob(id, fields) {
   if (fields.fileCount !== undefined) update.fileCount = fields.fileCount;
   if (fields.analysis !== undefined) update.analysis = fields.analysis;
   if (fields.healthScore !== undefined) update.healthScore = fields.healthScore;
+  if (fields.interviewQuestions !== undefined) update.interviewQuestions = fields.interviewQuestions;
 
   await AnalysisJobModel.updateOne({ _id: id }, { $set: update });
 }

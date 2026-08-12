@@ -223,4 +223,52 @@ async function chatAboutRepository({ metadata, analysis, history, message }) {
   return text;
 }
 
-module.exports = { analyzeRepository, chatAboutRepository };
+const INTERVIEW_SYSTEM_INSTRUCTION =
+  "You are a senior engineer preparing someone to be interviewed about this specific codebase — e.g. before a " +
+  "technical interview at the company that owns it, or before defending it as a project. Using the analysis " +
+  "context provided, write realistic interview questions a skilled interviewer would ask about this repository's " +
+  "specific stack, architecture, and design decisions, each with a concise model answer grounded in the given " +
+  "context. Avoid generic textbook questions unrelated to what's actually in this repo. Cover a mix of " +
+  "categories: Architecture, Stack & Tooling, Code Quality & Testing, and Trade-offs & Decisions.";
+
+const INTERVIEW_RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    questions: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          category: { type: Type.STRING, description: "One of: Architecture, Stack & Tooling, Code Quality & Testing, Trade-offs & Decisions." },
+          question: { type: Type.STRING },
+          answer: { type: Type.STRING },
+        },
+        required: ["category", "question", "answer"],
+      },
+    },
+  },
+  required: ["questions"],
+};
+
+async function generateInterviewQuestions({ metadata, analysis }) {
+  const contextPreamble = buildAnalysisContext({ metadata, analysis });
+
+  const response = await client.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: `Repository context:\n\n${contextPreamble}`,
+    config: {
+      systemInstruction: INTERVIEW_SYSTEM_INSTRUCTION,
+      maxOutputTokens: 4096,
+      responseMimeType: "application/json",
+      responseSchema: INTERVIEW_RESPONSE_SCHEMA,
+    },
+  });
+
+  const text = response.text;
+  if (!text) {
+    throw new Error("Gemini response contained no text content");
+  }
+  return JSON.parse(text).questions;
+}
+
+module.exports = { analyzeRepository, chatAboutRepository, generateInterviewQuestions };

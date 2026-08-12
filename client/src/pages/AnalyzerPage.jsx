@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ApiError, createAnalysis, getAnalysis } from "../api";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ApiError, createAnalysis, generateInterviewQuestions, getAnalysis, touchAnalysisViewed } from "../api";
 import { useAuth } from "../auth/AuthContext";
 import { AnalysisTabs } from "../components/dashboard/AnalysisTabs";
+import { ChatWidget } from "../components/chat/ChatWidget";
+import { IconAlert, IconBranch, IconClock, IconStar, IconUsers } from "../components/ui/Icons";
+import { timeAgo } from "../lib/format";
 import { subscribeToJob } from "../socket";
 
 const STEPS = ["pending", "fetching", "analyzing", "completed"];
@@ -52,13 +55,72 @@ function ProgressSteps({ status }) {
   );
 }
 
+function StatPill({ icon: Icon, children }) {
+  if (children === null || children === undefined) return null;
+  return (
+    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border dark:border-border-dark text-[13px] text-text dark:text-text-dark">
+      <Icon width={14} height={14} className="shrink-0 text-accent dark:text-accent-dark" />
+      {children}
+    </span>
+  );
+}
+
+function RepoStatsStrip({ repository }) {
+  if (!repository) return null;
+  const { stars, forks, openIssues, license, pushedAt, contributorsCount } = repository;
+  const hasAny = [stars, forks, openIssues, license, pushedAt, contributorsCount].some(
+    (v) => v !== null && v !== undefined,
+  );
+  if (!hasAny) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2 mt-4">
+      <StatPill icon={IconStar}>{stars !== null && stars !== undefined ? `${stars} stars` : null}</StatPill>
+      <StatPill icon={IconBranch}>{forks !== null && forks !== undefined ? `${forks} forks` : null}</StatPill>
+      <StatPill icon={IconAlert}>{openIssues !== null && openIssues !== undefined ? `${openIssues} open issues` : null}</StatPill>
+      <StatPill icon={IconUsers}>{contributorsCount !== null && contributorsCount !== undefined ? `${contributorsCount} contributors` : null}</StatPill>
+      <StatPill icon={IconClock}>{pushedAt ? `Last commit ${timeAgo(pushedAt)}` : null}</StatPill>
+      {license && (
+        <span className="flex items-center px-3 py-1.5 rounded-lg border border-border dark:border-border-dark text-[13px] text-text dark:text-text-dark">
+          {license}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function AnalyzerPage() {
   const { user, logout, withAuth } = useAuth();
+  const [searchParams] = useSearchParams();
   const [url, setUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [jobId, setJobId] = useState(null);
+  const [jobId, setJobId] = useState(() => searchParams.get("job"));
   const [job, setJob] = useState(null);
+  const [interviewQuestions, setInterviewQuestions] = useState(null);
+  const [generatingInterview, setGeneratingInterview] = useState(false);
+  const viewTimerRef = useRef(null);
+
+  const handleTabChange = (tab) => {
+    if (!jobId) return;
+    if (viewTimerRef.current) clearTimeout(viewTimerRef.current);
+    viewTimerRef.current = setTimeout(() => {
+      void withAuth((token) => touchAnalysisViewed(token, jobId, tab));
+    }, 800);
+  };
+
+  const handleGenerateInterview = async () => {
+    if (!jobId || generatingInterview) return;
+    setGeneratingInterview(true);
+    try {
+      const result = await withAuth((token) => generateInterviewQuestions(token, jobId));
+      setInterviewQuestions(result.questions);
+    } catch {
+      // leave the generate button in place so the user can retry
+    } finally {
+      setGeneratingInterview(false);
+    }
+  };
 
   useEffect(() => {
     if (!jobId) return;
@@ -68,7 +130,10 @@ export function AnalyzerPage() {
     const refresh = async () => {
       try {
         const latest = await withAuth((token) => getAnalysis(token, jobId));
-        if (!cancelled) setJob(latest);
+        if (!cancelled) {
+          setJob(latest);
+          setInterviewQuestions(latest.interviewQuestions ?? null);
+        }
       } catch {
         // transient fetch error; the next progress event will retry
       }
@@ -123,6 +188,9 @@ export function AnalyzerPage() {
           RepoCipher AI
         </Link>
         <div className="flex items-center gap-5">
+          <Link to="/dashboard" className="text-heading dark:text-heading-dark no-underline">
+            Dashboard
+          </Link>
           <Link to="/profile" className="text-heading dark:text-heading-dark no-underline">
             {user?.displayName ?? user?.email}
           </Link>
@@ -168,6 +236,7 @@ export function AnalyzerPage() {
               {job.repository.description && (
                 <p className="text-text dark:text-text-dark mt-1">{job.repository.description}</p>
               )}
+              {job.status === "completed" && <RepoStatsStrip repository={job.repository} />}
             </div>
             <button
               type="button"
@@ -184,7 +253,19 @@ export function AnalyzerPage() {
             <p className="text-danger mt-4">Analysis failed: {job.error ?? "Unknown error"}</p>
           )}
 
-          {job.status === "completed" && job.analysis && <AnalysisTabs analysis={job.analysis} />}
+          {job.status === "completed" && job.analysis && (
+            <AnalysisTabs
+              analysis={job.analysis}
+              languages={job.repository.languages}
+              initialTab={job.lastViewedTab}
+              onTabChange={handleTabChange}
+              interviewQuestions={interviewQuestions}
+              onGenerateInterview={handleGenerateInterview}
+              generatingInterview={generatingInterview}
+            />
+          )}
+
+          {job.status === "completed" && <ChatWidget jobId={jobId} />}
         </section>
       )}
     </main>

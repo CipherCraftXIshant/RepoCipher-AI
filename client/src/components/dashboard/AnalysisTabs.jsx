@@ -7,14 +7,13 @@ import {
   IconFile,
   IconFolder,
   IconLayers,
-  IconMessage,
+  IconQuestion,
   IconSparkle,
   IconTerminal,
 } from "../ui/Icons";
-import { ChatPanel } from "../chat/ChatPanel";
 import { AnalysisPanelContent } from "./AnalysisPanelContent";
 
-const ANALYSIS_TABS = [
+export const ANALYSIS_TABS = [
   { id: "overview", label: "AI Summary", icon: IconSparkle, description: "A plain-English explanation of what this repository does and how it's put together." },
   { id: "stack", label: "Stack Detection", icon: IconBranch, description: "Frameworks, languages, and infrastructure detected from manifests and config files." },
   { id: "architecture", label: "Architecture", icon: IconLayers, description: "How requests flow through the system, from client to data layer." },
@@ -23,11 +22,19 @@ const ANALYSIS_TABS = [
   { id: "directories", label: "Key Directories", icon: IconFolder, description: "Important folders and what lives in each one." },
   { id: "risks", label: "Code Quality & Risks", icon: IconAlert, description: "Observations on testing, tooling, and other risk signals found in the repository." },
   { id: "languages", label: "Languages", icon: IconChart, description: "Composition of the codebase by language, by bytes." },
+  { id: "interview", label: "Interview Prep", icon: IconQuestion, description: "AI-generated interview questions and model answers grounded in this specific repository." },
   { id: "setup", label: "Setup & Run", icon: IconTerminal, description: "How to install and run this project locally." },
-  { id: "chat", label: "Repo Chat", icon: IconMessage, description: "Ask questions about this repository — answers are grounded in the analysis above." },
 ];
 
-export function AnalysisTabs({ analysis, languages, jobId, onTabChange, initialTab }) {
+export function AnalysisTabs({
+  analysis,
+  languages,
+  onTabChange,
+  initialTab,
+  interviewQuestions,
+  onGenerateInterview,
+  generatingInterview,
+}) {
   const [activeTab, setActiveTab] = useState(initialTab ?? ANALYSIS_TABS[0].id);
   const active = ANALYSIS_TABS.find((tab) => tab.id === activeTab) ?? ANALYSIS_TABS[0];
 
@@ -69,11 +76,14 @@ export function AnalysisTabs({ analysis, languages, jobId, onTabChange, initialT
         <h3 className="text-lg font-medium text-heading dark:text-heading-dark mb-1.5">{active.label}</h3>
         <p className="text-sm text-text dark:text-text-dark mb-6">{active.description}</p>
         <div key={active.id}>
-          {active.id === "chat" ? (
-            <ChatPanel jobId={jobId} />
-          ) : (
-            <AnalysisPanelContent tabId={active.id} analysis={analysis} languages={languages} />
-          )}
+          <AnalysisPanelContent
+            tabId={active.id}
+            analysis={analysis}
+            languages={languages}
+            interviewQuestions={interviewQuestions}
+            onGenerateInterview={onGenerateInterview}
+            generatingInterview={generatingInterview}
+          />
         </div>
       </div>
     </div>

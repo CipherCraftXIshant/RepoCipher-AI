@@ -70,6 +70,49 @@ export async function listAnalyses(accessToken) {
   return parseJsonOrThrow(res);
 }
 
+export async function deleteAnalysis(accessToken, id) {
+  const res = await fetch(`/api/analyses/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(accessToken),
+  });
+  return parseJsonOrThrow(res);
+}
+
+export async function touchAnalysisViewed(accessToken, id, tab) {
+  await fetch(`/api/analyses/${id}/viewed`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
+    body: JSON.stringify({ tab }),
+  });
+}
+
+export async function getChatMessages(accessToken, jobId) {
+  const res = await fetch(`/api/analyses/${jobId}/chat`, { headers: authHeaders(accessToken) });
+  return parseJsonOrThrow(res);
+}
+
+export async function sendChatMessage(accessToken, jobId, message) {
+  const res = await fetch(`/api/analyses/${jobId}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
+    body: JSON.stringify({ message }),
+  });
+  return parseJsonOrThrow(res);
+}
+
+export async function generateInterviewQuestions(accessToken, jobId) {
+  const res = await fetch(`/api/analyses/${jobId}/interview`, {
+    method: "POST",
+    headers: authHeaders(accessToken),
+  });
+  return parseJsonOrThrow(res);
+}
+
+export async function getDashboard(accessToken) {
+  const res = await fetch("/api/dashboard", { headers: authHeaders(accessToken) });
+  return parseJsonOrThrow(res);
+}
+
 export async function uploadAvatar(accessToken, file) {
   const formData = new FormData();
   formData.append("avatar", file);

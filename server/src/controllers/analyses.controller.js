@@ -5,9 +5,11 @@ const {
   getAnalysisJobWithRepository,
   listAnalysisJobsForUser,
   touchLastViewed,
+  updateAnalysisJob,
   upsertRepository,
 } = require("../models/repository.model");
 const { ingestionQueue } = require("../queues/ingestion.queue");
+const { generateInterviewQuestions } = require("../services/gemini.service");
 const { fetchRepoMetadata, parseGithubUrl } = require("../utils/github");
 
 async function createAnalysis(req, res) {
@@ -69,4 +71,30 @@ async function touchAnalysisView(req, res) {
   res.status(204).end();
 }
 
-module.exports = { createAnalysis, deleteAnalysis, getAnalysis, listMyAnalyses, touchAnalysisView };
+async function getInterviewQuestions(req, res) {
+  const job = await getAnalysisJobWithRepository(req.params.id, req.userId);
+  if (!job) {
+    throw new HttpError(404, "Analysis job not found");
+  }
+  if (job.status !== "completed" || !job.analysis) {
+    throw new HttpError(400, "This repository hasn't finished analyzing yet");
+  }
+
+  if (job.interviewQuestions?.length) {
+    res.json({ questions: job.interviewQuestions });
+    return;
+  }
+
+  const questions = await generateInterviewQuestions({ metadata: job.repository, analysis: job.analysis });
+  await updateAnalysisJob(job.id, { interviewQuestions: questions });
+  res.json({ questions });
+}
+
+module.exports = {
+  createAnalysis,
+  deleteAnalysis,
+  getAnalysis,
+  getInterviewQuestions,
+  listMyAnalyses,
+  touchAnalysisView,
+};

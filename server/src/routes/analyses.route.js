@@ -3,6 +3,7 @@ const {
   createAnalysis,
   deleteAnalysis,
   getAnalysis,
+  getInterviewQuestions,
   listMyAnalyses,
   touchAnalysisView,
 } = require("../controllers/analyses.controller");
@@ -21,5 +22,6 @@ analysesRouter.delete("/:id", asyncHandler(deleteAnalysis));
 analysesRouter.patch("/:id/viewed", asyncHandler(touchAnalysisView));
 analysesRouter.get("/:id/chat", asyncHandler(listChatMessagesForJob));
 analysesRouter.post("/:id/chat", asyncHandler(sendChatMessage));
+analysesRouter.post("/:id/interview", asyncHandler(getInterviewQuestions));
 
 module.exports = { analysesRouter };
