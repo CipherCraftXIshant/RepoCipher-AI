@@ -108,6 +108,15 @@ export async function generateInterviewQuestions(accessToken, jobId) {
   return parseJsonOrThrow(res);
 }
 
+export async function runInterviewTurn(accessToken, jobId, history, answer = "") {
+  const res = await fetch(`/api/analyses/${jobId}/interview/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
+    body: JSON.stringify({ history, answer }),
+  });
+  return parseJsonOrThrow(res);
+}
+
 export async function getDashboard(accessToken) {
   const res = await fetch("/api/dashboard", { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);

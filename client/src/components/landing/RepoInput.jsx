@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IconAlert, IconArrowRight, IconGithub, IconLoader } from "../ui/Icons";
 import { DEFAULT_DEMO_REPO, parseRepoInput } from "./data";
+import { Sparkles, CheckCircle2 } from "lucide-react";
 
 export function RepoInput({ onAnalyze }) {
   const [value, setValue] = useState("");
@@ -16,7 +17,7 @@ export function RepoInput({ onAnalyze }) {
 
     const parsed = parseRepoInput(value);
     if (!parsed) {
-      setError("Enter a public GitHub repo, e.g. github.com/facebook/react");
+      setError("Enter a valid public GitHub repo, e.g. github.com/facebook/react");
       return;
     }
 
@@ -28,27 +29,29 @@ export function RepoInput({ onAnalyze }) {
     }, 650);
   };
 
-  const fillExample = () => {
-    setValue(`github.com/${DEFAULT_DEMO_REPO}`);
+  const fillExample = (repo = DEFAULT_DEMO_REPO) => {
+    setValue(`github.com/${repo}`);
     setError(null);
   };
 
   return (
-    <div className="max-w-160 mx-auto">
+    <div className="max-w-2xl mx-auto space-y-3">
       <form
         onSubmit={handleSubmit}
-        className={`flex flex-col sm:flex-row items-stretch gap-2.5 p-2.5 rounded-2xl bg-white/3 border transition-shadow duration-200 ${
-          error ? "border-danger/60" : "border-white/10 focus-within:border-accent-dark/60 focus-within:shadow-[0_0_0_4px_rgb(192_132_252/0.12)]"
+        className={`flex flex-col sm:flex-row items-stretch gap-2 p-2 rounded-2xl bg-white dark:bg-slate-900/90 border transition-all duration-200 shadow-lg shadow-slate-200/50 dark:shadow-slate-950/50 ${
+          error
+            ? "border-rose-400 ring-2 ring-rose-400/20"
+            : "border-slate-200 dark:border-slate-800 focus-within:border-primary-500 dark:focus-within:border-primary-400 focus-within:ring-4 focus-within:ring-primary-500/15"
         }`}
       >
-        <div className="flex items-center gap-2.5 flex-1 px-3.5">
-          <IconGithub className="text-text-dark shrink-0" width={18} height={18} />
+        <div className="flex items-center gap-3 flex-1 px-4 py-1">
+          <IconGithub className="text-slate-400 dark:text-slate-500 shrink-0" width={20} height={20} />
           <input
             type="text"
             inputMode="url"
             autoComplete="off"
             spellCheck={false}
-            placeholder="github.com/owner/repo"
+            placeholder="github.com/owner/repo or paste URL..."
             value={value}
             disabled={submitting}
             onChange={(e) => {
@@ -57,21 +60,23 @@ export function RepoInput({ onAnalyze }) {
             }}
             aria-label="GitHub repository URL"
             aria-invalid={Boolean(error)}
-            className="w-full bg-transparent border-0 outline-none py-2.5 text-[15px] text-heading-dark placeholder:text-text-dark/60 [font:inherit]"
+            className="w-full bg-transparent border-0 outline-none py-2 text-sm sm:text-base text-slate-900 dark:text-white placeholder:text-slate-400 font-medium"
           />
         </div>
+
         <button
           type="submit"
           disabled={submitting || !value.trim()}
-          className="group shrink-0 inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl bg-accent-dark text-[#0b0710] font-medium text-[15px] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none cursor-pointer whitespace-nowrap"
+          className="group shrink-0 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white font-semibold text-sm transition-all duration-150 shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer whitespace-nowrap"
         >
           {submitting ? (
             <>
               <IconLoader width={16} height={16} />
-              Analyzing…
+              Analyzing Repo...
             </>
           ) : (
             <>
+              <Sparkles className="w-4 h-4" />
               Analyze Repo
               <IconArrowRight width={16} height={16} className="transition-transform duration-200 group-hover:translate-x-1" />
             </>
@@ -79,22 +84,37 @@ export function RepoInput({ onAnalyze }) {
         </button>
       </form>
 
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 mt-3 text-[13px] text-text-dark">
+      {/* Helper / Popular links */}
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400">
         {error ? (
-          <span className="flex items-center gap-1.5 text-danger" role="alert">
+          <span className="flex items-center gap-1.5 text-rose-500 font-semibold" role="alert">
             <IconAlert width={14} height={14} />
             {error}
           </span>
         ) : (
-          <span>Public repositories • No cloning required</span>
+          <span className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            Instant AI onboarding breakdown
+          </span>
         )}
-        <button
-          type="button"
-          onClick={fillExample}
-          className="text-accent-dark hover:underline underline-offset-2 cursor-pointer bg-transparent border-0 p-0 [font:inherit]"
-        >
-          Try github.com/{DEFAULT_DEMO_REPO}
-        </button>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-slate-400">Try:</span>
+          {[
+            { label: "facebook/react", repo: "facebook/react" },
+            { label: "vercel/next.js", repo: "vercel/next.js" },
+            { label: "expressjs/express", repo: "expressjs/express" },
+          ].map((item) => (
+            <button
+              key={item.repo}
+              type="button"
+              onClick={() => fillExample(item.repo)}
+              className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition-colors cursor-pointer border border-slate-200/60 dark:border-slate-700/60"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

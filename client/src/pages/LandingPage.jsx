@@ -25,29 +25,30 @@ export function LandingPage() {
   };
 
   return (
-    <div className="bg-bg-dark text-text-dark min-h-svh relative">
-      <div aria-hidden="true" className="fixed inset-0 bg-noise pointer-events-none" />
+    <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen relative transition-colors duration-300 font-sans antialiased selection:bg-primary-100 selection:text-primary-900">
+      {/* Background grid overlay */}
+      <div aria-hidden="true" className="fixed inset-0 bg-grid-pattern opacity-60 pointer-events-none" />
 
       <Navbar isAuthenticated={isAuthenticated} />
 
-      <main className="relative">
+      <main className="relative z-10 space-y-20 sm:space-y-28 pb-16">
         <Hero onAnalyze={handleAnalyze} />
 
-        <section className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section className="px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
             <Reveal>
               <AnalysisDemo trigger={trigger} />
             </Reveal>
           </div>
         </section>
 
-        <section className="px-6 pb-24 sm:pb-28 bg-dot-grid mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]">
-          <div className="max-w-220 mx-auto">
+        <section className="px-4 sm:px-6 py-12 bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800/80">
+          <div className="max-w-5xl mx-auto space-y-8">
             <Reveal>
               <SectionHeading
                 eyebrow="See it work"
                 title="Every file, explained on click"
-                subtitle="Explore a realistic repository tree — select any file or folder to see what RepoCipher would tell you about it."
+                subtitle="Explore a realistic repository tree — select any file or folder to see what RepoCipher tells you about it."
               />
             </Reveal>
             <Reveal delay={80}>
@@ -56,8 +57,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="features" className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section id="features" className="px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto space-y-8">
             <Reveal>
               <SectionHeading
                 eyebrow="What RepoCipher finds"
@@ -71,8 +72,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section className="px-4 sm:px-6 py-12 bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800/80">
+          <div className="max-w-5xl mx-auto space-y-8">
             <Reveal>
               <SectionHeading
                 eyebrow="Architecture"
@@ -86,8 +87,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="preview" className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section id="preview" className="px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto space-y-8">
             <Reveal>
               <SectionHeading
                 eyebrow="Inside the product"
@@ -101,8 +102,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="how-it-works" className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section id="how-it-works" className="px-4 sm:px-6 py-12 bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800/80">
+          <div className="max-w-5xl mx-auto space-y-8">
             <Reveal>
               <SectionHeading eyebrow="How it works" title="From URL to understanding, in three steps" />
             </Reveal>
@@ -110,14 +111,14 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section className="px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
             <TrustMetrics />
           </div>
         </section>
 
-        <section className="px-6 pb-24 sm:pb-28">
-          <div className="max-w-220 mx-auto">
+        <section className="px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
             <Reveal>
               <FinalCTA isAuthenticated={isAuthenticated} />
             </Reveal>

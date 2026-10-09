@@ -4,6 +4,7 @@ const {
   deleteAnalysis,
   getAnalysis,
   getInterviewQuestions,
+  runInterviewTurn,
   listMyAnalyses,
   touchAnalysisView,
 } = require("../controllers/analyses.controller");
@@ -23,5 +24,6 @@ analysesRouter.patch("/:id/viewed", asyncHandler(touchAnalysisView));
 analysesRouter.get("/:id/chat", asyncHandler(listChatMessagesForJob));
 analysesRouter.post("/:id/chat", asyncHandler(sendChatMessage));
 analysesRouter.post("/:id/interview", asyncHandler(getInterviewQuestions));
+analysesRouter.post("/:id/interview/session", asyncHandler(runInterviewTurn));
 
 module.exports = { analysesRouter };

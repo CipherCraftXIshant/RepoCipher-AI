@@ -9,7 +9,7 @@ const {
   upsertRepository,
 } = require("../models/repository.model");
 const { ingestionQueue } = require("../queues/ingestion.queue");
-const { generateInterviewQuestions } = require("../services/gemini.service");
+const { generateInterviewQuestions, runRepositoryInterview } = require("../services/gemini.service");
 const { fetchRepoMetadata, parseGithubUrl } = require("../utils/github");
 
 async function createAnalysis(req, res) {
@@ -90,11 +90,42 @@ async function getInterviewQuestions(req, res) {
   res.json({ questions });
 }
 
+async function runInterviewTurn(req, res) {
+  const job = await getAnalysisJobWithRepository(req.params.id, req.userId);
+  if (!job) throw new HttpError(404, "Analysis job not found");
+  if (job.status !== "completed" || !job.analysis) {
+    throw new HttpError(400, "This repository hasn't finished analyzing yet");
+  }
+
+  const { history, answer } = req.body ?? {};
+  if (!Array.isArray(history) || history.length > 4 || history.some((turn) =>
+    !turn || typeof turn.question !== "string" || turn.question.length > 1000 ||
+    typeof turn.answer !== "string" || turn.answer.length > 6000
+  )) {
+    throw new HttpError(400, "Interview history must contain up to four question and answer turns");
+  }
+  if (history.length && (typeof answer !== "string" || !answer.trim())) {
+    throw new HttpError(400, "Please provide an answer to continue the interview");
+  }
+  if (typeof answer === "string" && answer.length > 6000) {
+    throw new HttpError(400, "Interview answers must be 6,000 characters or fewer");
+  }
+
+  const result = await runRepositoryInterview({
+    metadata: job.repository,
+    analysis: job.analysis,
+    history,
+    answer: answer?.trim() || "",
+  });
+  res.json(result);
+}
+
 module.exports = {
   createAnalysis,
   deleteAnalysis,
   getAnalysis,
   getInterviewQuestions,
+  runInterviewTurn,
   listMyAnalyses,
   touchAnalysisView,
 };

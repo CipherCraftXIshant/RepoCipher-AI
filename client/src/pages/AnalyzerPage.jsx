@@ -4,6 +4,7 @@ import {
   ApiError,
   createAnalysis,
   generateInterviewQuestions,
+  runInterviewTurn,
   getAnalysis,
   touchAnalysisViewed,
 } from "../api";
@@ -139,6 +140,9 @@ export function AnalyzerPage() {
       setGeneratingInterview(false);
     }
   };
+
+  const handleInterviewTurn = (history, answer = "") =>
+    withAuth((token) => runInterviewTurn(token, jobId, history, answer));
 
   useEffect(() => {
     if (!jobId) return;
@@ -407,6 +411,7 @@ export function AnalyzerPage() {
                     interviewQuestions={interviewQuestions}
                     onGenerateInterview={handleGenerateInterview}
                     generatingInterview={generatingInterview}
+                    onInterviewTurn={handleInterviewTurn}
                   />
 
                   {/* Interactive AI Codebase Chat Widget */}

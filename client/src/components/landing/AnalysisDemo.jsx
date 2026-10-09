@@ -3,6 +3,7 @@ import { usePrefersReducedMotion } from "../../lib/hooks";
 import { IconCheck, IconGithub } from "../ui/Icons";
 import { ANALYSIS_STEPS, DEFAULT_DEMO_REPO, INSIGHT_TABS } from "./data";
 import { InsightPanelContent } from "./InsightPanelContent";
+import { Sparkles } from "lucide-react";
 
 const DEMO_TABS = INSIGHT_TABS.filter((tab) => tab.id !== "dependencies");
 const STEP_DELAY_MS = 380;
@@ -16,20 +17,22 @@ const CHECKLIST = [
 
 function StepRow({ label, state }) {
   return (
-    <li className="flex items-center gap-2.5 text-[13px]">
+    <li className="flex items-center gap-2.5 text-xs sm:text-sm font-medium">
       <span
         className={`flex items-center justify-center w-4 h-4 rounded-full shrink-0 border ${
           state === "done"
-            ? "bg-good/20 border-good text-good"
+            ? "bg-emerald-500/20 border-emerald-500 text-emerald-600 dark:text-emerald-400"
             : state === "active"
-              ? "border-accent-dark text-accent-dark"
-              : "border-white/15 text-transparent"
+            ? "border-primary-500 text-primary-500"
+            : "border-slate-300 dark:border-slate-700 text-transparent"
         }`}
       >
         {state === "done" && <IconCheck width={10} height={10} />}
-        {state === "active" && <span className="w-1.5 h-1.5 rounded-full bg-accent-dark animate-pulse" />}
+        {state === "active" && <span className="w-1.5 h-1.5 rounded-full bg-primary-600 dark:bg-primary-400 animate-pulse" />}
       </span>
-      <span className={state === "pending" ? "text-text-dark/50" : "text-text-dark"}>{label}</span>
+      <span className={state === "pending" ? "text-slate-400 dark:text-slate-600" : "text-slate-800 dark:text-slate-200"}>
+        {label}
+      </span>
     </li>
   );
 }
@@ -80,23 +83,34 @@ export function AnalysisDemo({ trigger }) {
   return (
     <div
       id="analysis-demo"
-      className="rounded-2xl border border-white/10 bg-white/[0.02] shadow-[0_20px_60px_-24px_rgb(0_0_0/0.6)] overflow-hidden"
+      className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-2xl shadow-slate-200/50 dark:shadow-slate-950/50 overflow-hidden"
     >
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-white/[0.015]">
-        <span className="text-[13px] font-medium text-heading-dark">RepoCipher AI</span>
-        <span className="flex items-center gap-1.5 text-xs text-good font-medium">
-          <span className="relative flex w-1.5 h-1.5">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-good opacity-75 animate-ping" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-good" />
+      {/* Top terminal bar */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-950/70">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-rose-400" />
+            <span className="w-3 h-3 rounded-full bg-amber-400" />
+            <span className="w-3 h-3 rounded-full bg-emerald-400" />
+          </div>
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-2 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+            RepoCipher Live Analysis
           </span>
-          Live
+        </div>
+        <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+          <span className="relative flex w-2 h-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          Active Session
         </span>
       </div>
 
-      <div className="p-5 sm:p-7">
-        <div className="flex items-center gap-2 text-sm text-text-dark mb-5">
-          <IconGithub width={15} height={15} />
-          <span className="font-mono">github.com/{repoLabel}</span>
+      <div className="p-5 sm:p-7 space-y-5">
+        <div className="flex items-center gap-2 text-xs sm:text-sm font-mono text-slate-600 dark:text-slate-300 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-950/70 border border-slate-200/60 dark:border-slate-800/60">
+          <IconGithub width={16} height={16} className="text-slate-400" />
+          <span className="font-semibold text-slate-900 dark:text-white">github.com/{repoLabel}</span>
         </div>
 
         {phase === "analyzing" ? (
@@ -107,14 +121,20 @@ export function AnalysisDemo({ trigger }) {
           </ul>
         ) : (
           <>
-            <p className="text-sm font-medium text-heading-dark mb-4">Repository understood.</p>
-            <ul className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 mb-6">
+            <div className="flex items-center justify-between">
+              <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                Repository Synthesis Complete
+              </p>
+            </div>
+
+            <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {CHECKLIST.map((label) => (
                 <StepRow key={label} label={label} state="done" />
               ))}
             </ul>
 
-            <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-white/[0.03] border border-white/10 mb-5" role="tablist">
+            <div className="flex flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800/80" role="tablist">
               {DEMO_TABS.map((tab) => (
                 <button
                   key={tab.id}
@@ -122,10 +142,10 @@ export function AnalysisDemo({ trigger }) {
                   role="tab"
                   aria-selected={activeTab === tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3.5 py-2 rounded-lg text-[13px] font-medium transition-colors duration-150 cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 cursor-pointer ${
                     activeTab === tab.id
-                      ? "bg-accent-dark text-[#0b0710]"
-                      : "text-text-dark hover:text-heading-dark hover:bg-white/5"
+                      ? "bg-primary-600 text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
                   }`}
                 >
                   {tab.label}
@@ -133,7 +153,7 @@ export function AnalysisDemo({ trigger }) {
               ))}
             </div>
 
-            <div key={activeTab} className="min-h-45 fade-in">
+            <div key={activeTab} className="min-h-45 fade-in pt-2">
               <InsightPanelContent tabId={activeTab} />
             </div>
           </>

@@ -271,4 +271,37 @@ async function generateInterviewQuestions({ metadata, analysis }) {
   return JSON.parse(text).questions;
 }
 
-module.exports = { analyzeRepository, chatAboutRepository, generateInterviewQuestions };
+async function runRepositoryInterview({ metadata, analysis, history, answer }) {
+  const contextPreamble = buildAnalysisContext({ metadata, analysis });
+  const isFirstQuestion = history.length === 0;
+  const prompt = [
+    `Repository context:\n\n${contextPreamble}`,
+    "Conduct a five-question technical interview about this repository. Ask one focused question at a time, grounded in the provided repository context. Avoid generic questions.",
+    history.length ? `Previous interview turns (oldest first):\n${JSON.stringify(history)}` : "",
+    answer ? `The candidate's latest answer is:\n${answer}` : "",
+    isFirstQuestion
+      ? "This is the first turn. Set feedback to an empty string and ask the first question."
+      : history.length >= 4
+        ? "This was the fifth answer. Provide feedback and set question to an empty string to end the interview."
+        : "Briefly assess the candidate's latest answer with specific strengths and one improvement. Then ask the next question. Keep the question distinct from previous ones.",
+  ].filter(Boolean).join("\n\n");
+
+  const response = await client.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+    config: {
+      systemInstruction: "You are a fair, encouraging senior engineer interviewer. Base questions and answer feedback only on the supplied repository analysis. Do not invent code details.",
+      maxOutputTokens: 1200,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: { question: { type: Type.STRING }, feedback: { type: Type.STRING } },
+        required: ["question", "feedback"],
+      },
+    },
+  });
+  if (!response.text) throw new Error("Gemini response contained no text content");
+  return JSON.parse(response.text);
+}
+
+module.exports = { analyzeRepository, chatAboutRepository, generateInterviewQuestions, runRepositoryInterview };

@@ -34,6 +34,7 @@ export function AnalysisTabs({
   interviewQuestions,
   onGenerateInterview,
   generatingInterview,
+  onInterviewTurn,
 }) {
   const [activeTab, setActiveTab] = useState(initialTab ?? ANALYSIS_TABS[0].id);
   const active = ANALYSIS_TABS.find((tab) => tab.id === activeTab) ?? ANALYSIS_TABS[0];
@@ -83,6 +84,7 @@ export function AnalysisTabs({
             interviewQuestions={interviewQuestions}
             onGenerateInterview={onGenerateInterview}
             generatingInterview={generatingInterview}
+            onInterviewTurn={onInterviewTurn}
           />
         </div>
       </div>

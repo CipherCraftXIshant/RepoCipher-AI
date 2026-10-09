@@ -41,6 +41,94 @@ function InterviewQuestionCard({ item }) {
   );
 }
 
+function InterviewPractice({ onInterviewTurn }) {
+  const [history, setHistory] = useState([]);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const start = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await onInterviewTurn([]);
+      setQuestion(result.question);
+    } catch (err) {
+      setError(err.message || "Could not start the interview. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!answer.trim() || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await onInterviewTurn(history, answer.trim());
+      setHistory((items) => [...items, { question, answer: answer.trim(), feedback: result.feedback }]);
+      setQuestion(result.question);
+      setAnswer("");
+    } catch (err) {
+      setError(err.message || "Could not submit your answer. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reset = () => {
+    setHistory([]);
+    setQuestion("");
+    setAnswer("");
+    setError("");
+  };
+
+  return (
+    <section className="rounded-xl border border-accent-border dark:border-accent-border-dark bg-accent-bg/50 dark:bg-accent-bg-dark/50 p-4 sm:p-5 mb-6">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <h4 className="text-sm font-semibold text-heading dark:text-heading-dark">Practice interview</h4>
+          <p className="text-xs text-text dark:text-text-dark mt-1">Answer five questions based on this repository, then get feedback on each response.</p>
+        </div>
+        {history.length > 0 && <span className="text-xs text-text dark:text-text-dark">{Math.min(history.length + (question ? 1 : 0), 5)} / 5</span>}
+      </div>
+      {!question && history.length === 0 ? (
+        <button type="button" onClick={start} disabled={busy} className="text-sm px-4 py-2 rounded-lg bg-accent dark:bg-accent-dark text-white disabled:opacity-60">
+          {busy ? "Preparing your first question…" : "Start practice interview"}
+        </button>
+      ) : null}
+      {history.map((turn, index) => (
+        <div key={`${index}-${turn.question}`} className="border-t border-border dark:border-border-dark py-3 text-sm">
+          <p className="font-medium text-heading dark:text-heading-dark">{index + 1}. {turn.question}</p>
+          <p className="text-text dark:text-text-dark mt-2"><span className="font-medium">Your answer:</span> {turn.answer}</p>
+          <p className="text-text dark:text-text-dark mt-2"><span className="font-medium">Feedback:</span> {turn.feedback}</p>
+        </div>
+      ))}
+      {question ? (
+        <form onSubmit={submit} className="border-t border-border dark:border-border-dark pt-3">
+          <p className="text-sm font-medium text-heading dark:text-heading-dark mb-3">{history.length + 1}. {question}</p>
+          <label className="sr-only" htmlFor="interview-answer">Your answer</label>
+          <textarea id="interview-answer" value={answer} onChange={(event) => setAnswer(event.target.value)} maxLength={6000} rows={4} placeholder="Explain your answer…" className="w-full resize-y rounded-lg border border-border dark:border-border-dark bg-bg dark:bg-bg-dark p-3 text-sm text-heading dark:text-heading-dark outline-none focus:ring-2 focus:ring-accent/30" />
+          <div className="flex items-center justify-between gap-3 mt-2">
+            <span className="text-xs text-text dark:text-text-dark">{history.length + 1} of 5 questions</span>
+            <button type="submit" disabled={busy || !answer.trim()} className="text-sm px-4 py-2 rounded-lg bg-accent dark:bg-accent-dark text-white disabled:opacity-50">{busy ? "Reviewing…" : "Submit answer"}</button>
+          </div>
+        </form>
+      ) : null}
+      {!question && history.length > 0 && (
+        <div className="border-t border-border dark:border-border-dark pt-3">
+          <p className="text-sm font-semibold text-heading dark:text-heading-dark">Interview complete</p>
+          <p className="text-sm text-text dark:text-text-dark mt-1">You’ve answered all five repository-specific questions.</p>
+          <button type="button" onClick={reset} className="text-sm mt-3 underline text-accent dark:text-accent-dark">Practice again</button>
+        </div>
+      )}
+      {error && <p role="alert" className="text-sm text-rose-600 mt-3">{error}</p>}
+    </section>
+  );
+}
+
 export function AnalysisPanelContent({
   tabId,
   analysis,
@@ -48,6 +136,7 @@ export function AnalysisPanelContent({
   interviewQuestions,
   onGenerateInterview,
   generatingInterview,
+  onInterviewTurn,
 }) {
   if (!analysis) return <EmptyState label="analysis" />;
 
@@ -206,36 +295,20 @@ export function AnalysisPanelContent({
   }
 
   if (tabId === "interview") {
-    if (generatingInterview) {
-      return (
-        <div className="flex items-center gap-2 text-sm text-text dark:text-text-dark">
-          <IconLoader width={16} height={16} />
-          Generating interview questions…
-        </div>
-      );
-    }
-    if (!interviewQuestions?.length) {
-      return (
-        <div>
-          <p className="text-sm text-text dark:text-text-dark mb-4">
-            Generate realistic interview questions — with model answers — grounded in this repository's actual stack and architecture.
-          </p>
-          <button
-            type="button"
-            onClick={onGenerateInterview}
-            className="[font:inherit] text-sm px-4 py-2.5 rounded-lg border border-accent-border dark:border-accent-border-dark bg-accent-bg dark:bg-accent-bg-dark text-heading dark:text-heading-dark cursor-pointer"
-          >
-            Generate Interview Questions
-          </button>
-        </div>
-      );
-    }
     return (
-      <ul className="flex flex-col gap-2">
-        {interviewQuestions.map((item) => (
-          <InterviewQuestionCard key={item.question} item={item} />
-        ))}
-      </ul>
+      <>
+        <InterviewPractice onInterviewTurn={onInterviewTurn} />
+        {generatingInterview ? (
+          <div className="flex items-center gap-2 text-sm text-text dark:text-text-dark"><IconLoader width={16} height={16} /> Generating question bank…</div>
+        ) : !interviewQuestions?.length ? (
+          <div>
+            <p className="text-sm text-text dark:text-text-dark mb-4">Prefer to study on your own? Generate a question bank with model answers.</p>
+            <button type="button" onClick={onGenerateInterview} className="[font:inherit] text-sm px-4 py-2.5 rounded-lg border border-accent-border dark:border-accent-border-dark bg-accent-bg dark:bg-accent-bg-dark text-heading dark:text-heading-dark cursor-pointer">Generate Interview Questions</button>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2">{interviewQuestions.map((item) => <InterviewQuestionCard key={item.question} item={item} />)}</ul>
+        )}
+      </>
     );
   }
 
