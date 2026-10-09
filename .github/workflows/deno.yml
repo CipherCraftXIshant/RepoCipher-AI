@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
@@ -40,3 +41,35 @@ jobs:
 
       - name: Run tests
         run: deno test -A
+=======
+name: Node.js CI (Replacing Deno Workflow)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint client codebase
+        run: npm run lint --workspace=client
+
+      - name: Build client application
+        run: npm run build:client
+>>>>>>> 5b18f3e (fixed git workflow fail)
