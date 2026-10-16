@@ -5,7 +5,7 @@ import { IconClose, IconMenu, IconSparkle } from "../ui/Icons";
 import { useScrolled } from "../../lib/hooks";
 import { useTheme } from "../../lib/theme";
 import { NAV_LINKS } from "./data";
-import { Sun, Moon } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 export function Navbar({ isAuthenticated }) {
   const scrolled = useScrolled(8);
@@ -20,135 +20,69 @@ export function Navbar({ isAuthenticated }) {
     target.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const linkColor = scrolled
+    ? "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white"
+    : "text-slate-300 hover:bg-white/10 hover:text-white";
+  const controlStyle = scrolled
+    ? "border-slate-200/80 bg-slate-100 text-slate-600 hover:bg-slate-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+    : "border-white/10 bg-white/[0.05] text-slate-300 hover:bg-white/10 hover:text-white";
+
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs"
-          : "bg-transparent border-b border-transparent"
-      }`}
-    >
-      <nav className="max-w-7xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
-        {/* Brand */}
-        <Link to="/" className="flex items-center gap-2.5 font-bold text-lg text-slate-900 dark:text-white no-underline shrink-0 group">
-          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary-600 text-white shadow-sm transition-transform duration-200 group-hover:scale-105">
-            <IconSparkle />
-          </div>
-          <span className="tracking-tight flex items-center gap-1.5">
-            RepoCipher
-            <span className="inline-flex items-center rounded-md bg-primary-50 dark:bg-primary-950 px-1.5 py-0.5 text-[10px] font-bold text-primary-600 dark:text-primary-400 border border-primary-200/60 dark:border-primary-800/60">
-              AI
-            </span>
-          </span>
+    <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${scrolled ? "border-slate-200/80 bg-white/85 shadow-xs dark:border-slate-800/80 dark:bg-slate-950/85" : "border-white/[0.08] bg-[#080d1b]/65"}`}>
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8 lg:px-10" aria-label="Main navigation">
+        <Link to="/" className={`group flex shrink-0 items-center gap-2.5 text-lg font-bold no-underline ${scrolled ? "text-slate-900 dark:text-white" : "text-white"}`}>
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 text-white shadow-lg shadow-indigo-950/30 transition-transform duration-200 group-hover:scale-105"><IconSparkle /></span>
+          <span className="flex items-center gap-1.5 tracking-tight">RepoCipher<span className={`inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-bold ${scrolled ? "border-primary-200/60 bg-primary-50 text-primary-600 dark:border-primary-800/60 dark:bg-primary-950 dark:text-primary-400" : "border-white/10 bg-white/10 text-indigo-200"}`}>AI</span></span>
         </Link>
 
-        {/* Nav Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 backdrop-blur md:flex lg:gap-2">
           {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(e) => handleAnchorClick(e, link.href)}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 no-underline"
-            >
+            <a key={link.label} href={link.href} onClick={(e) => handleAnchorClick(e, link.href)} className={`rounded-full px-3 py-2 text-[13px] font-medium transition-colors no-underline ${linkColor}`}>
               {link.label}
             </a>
           ))}
         </div>
 
-        {/* Right CTA + Theme Toggle */}
-        <div className="hidden md:flex items-center gap-3 shrink-0">
-          {/* Theme Toggle Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800/80 transition-all cursor-pointer focus:outline-none"
-            aria-label="Toggle theme"
-            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            {theme === "dark" ? (
-              <Sun className="w-4 h-4 text-amber-400 animate-spin-once" />
-            ) : (
-              <Moon className="w-4 h-4 text-slate-700 animate-spin-once" />
-            )}
+        <div className="hidden shrink-0 items-center gap-2 md:flex">
+          <button type="button" onClick={toggleTheme} className={`rounded-xl border p-2 transition-colors ${controlStyle}`} aria-label="Toggle theme" title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+            {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className={`h-4 w-4 ${scrolled ? "text-slate-700" : "text-slate-200"}`} />}
           </button>
-
           {isAuthenticated ? (
-            <Button to="/app" variant="secondary" size="md">
-              Open app
-            </Button>
+            <Button to="/app" variant={scrolled ? "secondary" : "default"} size="md" className={!scrolled ? "bg-white text-slate-950 hover:bg-slate-100" : ""}>Open app</Button>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors duration-150 no-underline px-2"
-              >
-                Log in
-              </Link>
-              <Button to="/signup" variant="default" size="md" showArrow className="shadow-sm font-semibold">
-                Get started
-              </Button>
+              <Link to="/login" className={`px-3 py-2 text-sm font-semibold transition-colors no-underline ${scrolled ? "text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white" : "text-slate-300 hover:text-white"}`}>Log in</Link>
+              <Button to="/signup" variant="default" size="md" showArrow className="font-semibold shadow-sm shadow-indigo-950/30">Get started</Button>
             </>
           )}
         </div>
 
-        {/* Mobile controls */}
-        <div className="flex md:hidden items-center gap-2">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="w-4 h-4 text-amber-400" />
-            ) : (
-              <Moon className="w-4 h-4 text-slate-700" />
-            )}
+        <div className="flex items-center gap-2 md:hidden">
+          <button type="button" onClick={toggleTheme} className={`rounded-xl border p-2 transition-colors ${controlStyle}`} aria-label="Toggle theme">
+            {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className={`h-4 w-4 ${scrolled ? "text-slate-700" : "text-slate-200"}`} />}
           </button>
-
-          <button
-            type="button"
-            className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
+          <button type="button" className={`flex h-9 w-9 items-center justify-center rounded-xl border ${controlStyle}`} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen((value) => !value)}>
             {open ? <IconClose /> : <IconMenu />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Drawer */}
       {open && (
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl px-6 py-5 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-150">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(e) => handleAnchorClick(e, link.href)}
-              className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors no-underline"
-            >
-              {link.label}
-            </a>
-          ))}
-          <div className="flex flex-col gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+        <div id="mobile-navigation" className={`animate-in slide-in-from-top-2 border-t px-5 py-5 duration-150 md:hidden ${scrolled ? "border-slate-200 bg-white/95 dark:border-slate-800 dark:bg-slate-950/95" : "border-white/10 bg-[#080d1b]/95"}`}>
+          <div className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) => (
+              <a key={link.label} href={link.href} onClick={(e) => handleAnchorClick(e, link.href)} className={`rounded-xl px-3 py-2.5 text-sm font-medium transition-colors no-underline ${linkColor}`}>
+                {link.label}
+              </a>
+            ))}
+          </div>
+          <div className={`mt-4 flex flex-col gap-3 border-t pt-4 ${scrolled ? "border-slate-200 dark:border-slate-800" : "border-white/10"}`}>
             {isAuthenticated ? (
-              <Button to="/app" variant="secondary" size="md" onClick={() => setOpen(false)}>
-                Open app
-              </Button>
+              <Button to="/app" variant={scrolled ? "secondary" : "default"} className={!scrolled ? "bg-white text-slate-950 hover:bg-slate-100" : ""} onClick={() => setOpen(false)}>Open app</Button>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  onClick={() => setOpen(false)}
-                  className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors no-underline"
-                >
-                  Log in
-                </Link>
-                <Button to="/signup" variant="default" size="md" showArrow onClick={() => setOpen(false)}>
-                  Get started
-                </Button>
+                <Link to="/login" onClick={() => setOpen(false)} className={`px-3 py-2 text-sm font-semibold no-underline ${scrolled ? "text-slate-600 dark:text-slate-300" : "text-slate-300"}`}>Log in</Link>
+                <Button to="/signup" variant="default" showArrow onClick={() => setOpen(false)}>Get started</Button>
               </>
             )}
           </div>
