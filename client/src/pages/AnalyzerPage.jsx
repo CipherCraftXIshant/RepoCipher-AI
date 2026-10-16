@@ -77,15 +77,14 @@ function ProgressPipeline({ status }) {
           return (
             <div
               key={step}
-              className={`p-4 rounded-xl border transition-all duration-200 relative ${
-                isDone
+              className={`p-4 rounded-xl border transition-all duration-200 relative ${isDone
                   ? "bg-emerald-50/50 border-emerald-200/80 text-emerald-900"
                   : isActive
-                  ? "bg-primary-50/70 border-primary-300 ring-2 ring-primary-500/20 text-primary-900"
-                  : isFailed
-                  ? "bg-rose-50 border-rose-200 text-rose-900"
-                  : "bg-slate-50 border-slate-100 text-slate-400 opacity-70"
-              }`}
+                    ? "bg-primary-50/70 border-primary-300 ring-2 ring-primary-500/20 text-primary-900"
+                    : isFailed
+                      ? "bg-rose-50 border-rose-200 text-rose-900"
+                      : "bg-slate-50 border-slate-100 text-slate-400 opacity-70"
+                }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider">
@@ -148,6 +147,7 @@ export function AnalyzerPage() {
     if (!jobId) return;
 
     let cancelled = false;
+    let unsubscribe = null;
 
     const refresh = async () => {
       try {
@@ -163,17 +163,22 @@ export function AnalyzerPage() {
 
     void refresh();
 
-    const unsubscribe = subscribeToJob(jobId, (event) => {
-      if (event.status === "completed" || event.status === "failed") {
-        void refresh();
-      } else {
-        setJob((prev) => (prev ? { ...prev, status: event.status } : prev));
-      }
+    void withAuth((token) => {
+      if (cancelled) return;
+      unsubscribe = subscribeToJob(jobId, token, (event) => {
+        if (event.status === "completed" || event.status === "failed") {
+          void refresh();
+        } else {
+          setJob((prev) => (prev ? { ...prev, status: event.status } : prev));
+        }
+      });
+    }).catch(() => {
+      // The initial fetch above handles expired or missing authentication.
     });
 
     return () => {
       cancelled = true;
-      unsubscribe();
+      unsubscribe?.();
     };
   }, [jobId, withAuth]);
 
