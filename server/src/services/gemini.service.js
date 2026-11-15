@@ -2,6 +2,7 @@ const { GoogleGenAI, Type } = require("@google/genai");
 const { env } = require("../config/env");
 
 const client = new GoogleGenAI({ apiKey: env.geminiApiKey });
+const GEMINI_MODEL = env.geminiModel || "gemini-3.8-flash";
 
 const ANALYSIS_SYSTEM_INSTRUCTION =
   "You are a senior software engineer producing a detailed onboarding dashboard for a GitHub repository. " +
@@ -150,7 +151,7 @@ async function analyzeRepository(input) {
   const userContent = buildRepoContext(input);
 
   const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: GEMINI_MODEL,
     contents: userContent,
     config: {
       systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
@@ -214,7 +215,7 @@ async function chatAboutRepository({ metadata, analysis, history, message }) {
   ];
 
   const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: GEMINI_MODEL,
     contents,
     config: {
       systemInstruction: CHAT_SYSTEM_INSTRUCTION,
@@ -260,7 +261,7 @@ async function generateInterviewQuestions({ metadata, analysis }) {
   const contextPreamble = buildAnalysisContext({ metadata, analysis });
 
   const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: GEMINI_MODEL,
     contents: `Repository context:\n\n${contextPreamble}`,
     config: {
       systemInstruction: INTERVIEW_SYSTEM_INSTRUCTION,
@@ -293,7 +294,7 @@ async function runRepositoryInterview({ metadata, analysis, history, answer }) {
   ].filter(Boolean).join("\n\n");
 
   const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: GEMINI_MODEL,
     contents: prompt,
     config: {
       systemInstruction: "You are a fair, encouraging senior engineer interviewer. Base questions and answer feedback only on the supplied repository analysis. Do not invent code details.",

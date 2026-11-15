@@ -8,7 +8,9 @@ mongoose.connection.on("error", (err) => {
 
 async function connectDb() {
   await mongoose.connect(env.mongoUri);
-  logger.info("Connected to MongoDB");
+  const host = mongoose.connection.host || "unknown host";
+  const name = mongoose.connection.name || "repocipher";
+  logger.info(`Connected to MongoDB Atlas database '${name}' on host '${host}'`);
 
   try {
     const { UserModel } = require("../models/user.model");

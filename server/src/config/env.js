@@ -16,6 +16,7 @@ const env = {
   mongoUri: required("MONGODB_URI"),
   redisUrl: required("REDIS_URL"),
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-3.8-flash",
   githubToken: process.env.GITHUB_TOKEN ?? "",
 
   jwtAccessSecret: required("JWT_ACCESS_SECRET"),
@@ -27,11 +28,10 @@ const env = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
   googleCallbackUrl: process.env.GOOGLE_CALLBACK_URL ?? `http://localhost:${process.env.PORT ?? 4000}/api/auth/google/callback`,
 
-  r2AccountId: process.env.CLOUDFLARE_R2_ACCOUNT_ID ?? "",
-  r2AccessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID ?? "",
-  r2SecretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY ?? "",
-  r2Bucket: process.env.CLOUDFLARE_R2_BUCKET ?? "",
-  r2PublicUrl: process.env.CLOUDFLARE_R2_PUBLIC_URL ?? "",
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME ?? "",
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY ?? "",
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
+  cloudinaryUrl: process.env.CLOUDINARY_URL ?? "",
 };
 
 const isProduction = env.nodeEnv === "production";
