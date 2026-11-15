@@ -36,8 +36,8 @@ function toUser(doc) {
   };
 }
 
-async function createUserWithPassword(email, passwordHash) {
-  const doc = await UserModel.create({ email, passwordHash });
+async function createUserWithPassword(email, passwordHash, displayName = null) {
+  const doc = await UserModel.create({ email, passwordHash, displayName });
   return toUser(doc);
 }
 

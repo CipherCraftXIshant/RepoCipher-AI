@@ -19,11 +19,11 @@ function authHeaders(accessToken) {
   return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 }
 
-export async function signupRequest(email, password) {
+export async function signupRequest(email, password, displayName) {
   const res = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, displayName }),
   });
   return parseJsonOrThrow(res);
 }

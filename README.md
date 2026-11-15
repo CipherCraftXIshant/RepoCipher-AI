@@ -2,13 +2,13 @@
 
 Understand any GitHub repository in minutes, not days.
 
-RepoCipher AI ingests a public GitHub repository — its file tree and README — detects the tech stack, maps the architecture, and hands it to Claude to generate an onboarding summary: what the project does, how it's built, and where to start reading.
+RepoCipher AI ingests a public GitHub repository — its file tree, README, manifest, and a size-limited selection of representative source files — detects the tech stack, maps the architecture, and uses Gemini to generate an onboarding summary: what the project does, how it's built, and where to start reading. The file tree is inspected in full when GitHub returns it; source contents are sampled to keep requests within practical API and model limits.
 
 ## How it works
 
 1. **Paste a GitHub URL** — any public `owner/repo` or full `github.com/...` link.
 2. **Ingestion** — the server pulls the repository's file tree, metadata, and README directly from the GitHub API. No cloning required.
-3. **Analysis** — the file paths and README are sent to Claude, which detects the stack, infers the architecture, and writes an onboarding summary.
+3. **Analysis** — the file paths, README, manifest, and selected source excerpts are sent to Gemini, which detects the stack, infers the architecture, and writes an onboarding summary.
 4. **Realtime progress** — job status (`pending → fetching → analyzing → completed`) streams to the client over Socket.IO.
 5. **Read the result** — a Markdown onboarding doc covering the stack, structure, and entry points.
 
@@ -16,7 +16,7 @@ RepoCipher AI ingests a public GitHub repository — its file tree and README �
 
 **Client** — React 19, Vite, React Router, Tailwind CSS v4, Socket.IO client, react-markdown.
 
-**Server** — Express, MongoDB (Mongoose), Redis + BullMQ (job queue), Socket.IO, the Anthropic SDK (Claude), JWT auth with Google OAuth, Cloudflare R2 (avatar storage).
+**Server** — Express, MongoDB (Mongoose), Redis + BullMQ (job queue), Socket.IO, Google GenAI SDK (Gemini), JWT auth with Google OAuth, Cloudflare R2 (avatar storage).
 
 ## Project structure
 

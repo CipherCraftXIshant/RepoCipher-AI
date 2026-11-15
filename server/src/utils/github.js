@@ -4,26 +4,50 @@ const { HttpError } = require("../middleware/errorHandler");
 const GITHUB_API = "https://api.github.com";
 
 function parseGithubUrl(input) {
+  if (!input || typeof input !== "string") return null;
   const trimmed = input.trim();
+  if (!trimmed) return null;
 
-  const shorthand = trimmed.match(/^([\w.-]+)\/([\w.-]+?)(\.git)?$/);
-  if (shorthand) {
-    return { owner: shorthand[1], repo: shorthand[2] };
+  // 1. Handle SSH format: git@github.com:owner/repo.git
+  const sshMatch = trimmed.match(/^git@github\.com:([\w.-]+)\/([\w.-]+?)(?:\.git)?$/i);
+  if (sshMatch) {
+    return { owner: sshMatch[1], repo: sshMatch[2] };
   }
 
+  // 2. Handle HTTP/HTTPS/Domain/Shorthand formats
   try {
-    const url = new URL(/^https?:\/\//.test(trimmed) ? trimmed : `https://${trimmed}`);
-    if (url.hostname !== "github.com" && url.hostname !== "www.github.com") return null;
-    const [owner, repo] = url.pathname.replace(/^\//, "").replace(/\.git$/, "").split("/");
-    if (!owner || !repo) return null;
-    return { owner, repo };
+    const rawUrl = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed.replace(/^\/+/, "")}`;
+    const url = new URL(rawUrl);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+
+    if (host !== "github.com") {
+      // Plain shorthand check: "owner/repo" or "owner/repo.git"
+      const parts = trimmed.replace(/^\/+|\/+$/g, "").split("/");
+      if (parts.length === 2 && !parts[0].includes(".")) {
+        const repo = parts[1].replace(/\.git$/i, "");
+        if (parts[0] && repo) return { owner: parts[0], repo };
+      }
+      return null;
+    }
+
+    // Extract first two path segments: /owner/repo/...
+    const segments = url.pathname.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
+    if (segments.length >= 2) {
+      const owner = segments[0];
+      const repo = segments[1].replace(/\.git$/i, "");
+      if (owner && repo) return { owner, repo };
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
 function authHeaders() {
-  const headers = { Accept: "application/vnd.github+json" };
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "RepoCipher-AI/1.0",
+  };
   if (env.githubToken) headers.Authorization = `Bearer ${env.githubToken}`;
   return headers;
 }

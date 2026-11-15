@@ -33,8 +33,8 @@ export function AuthProvider({ children }) {
     setStatus("authenticated");
   }, []);
 
-  const signup = useCallback(async (email, password) => {
-    const result = await signupRequest(email, password);
+  const signup = useCallback(async (email, password, displayName) => {
+    const result = await signupRequest(email, password, displayName);
     accessTokenRef.current = result.accessToken;
     setUser(result.user);
     setStatus("authenticated");

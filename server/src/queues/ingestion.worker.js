@@ -17,6 +17,57 @@ const MANIFEST_CANDIDATES = /^(package\.json|requirements\.txt|pyproject\.toml|g
 const TEST_PATH_PATTERN = /(^|\/)(tests?|__tests__|spec)(\/|$)/i;
 const CI_PATH_PATTERN = /^\.github\/workflows\//;
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+const MAX_SOURCE_FILES = 24;
+const MAX_SOURCE_FILE_CHARS = 7000;
+const MAX_SOURCE_CONTEXT_CHARS = 70000;
+const IGNORE_PATH = /(^|\/)(node_modules|vendor|dist|build|coverage|\.git|\.next|\.turbo|target)(\/|$)/i;
+const SOURCE_EXTENSION = /\.(?:js|jsx|ts|tsx|mjs|cjs|py|go|rs|java|kt|rb|php|cs|cpp|c|h|hpp|swift|vue|svelte|html|css|scss|sql|sh|yaml|yml)$/i;
+
+function scoreSourcePath(path) {
+  if (!SOURCE_EXTENSION.test(path) || IGNORE_PATH.test(path) || path.split("/").length > 9) return -1;
+  const name = path.split("/").pop();
+  if (/\.(?:test|spec)\.[^.]+$/i.test(name)) return -1;
+  let score = 1;
+  if (/^(src|app|lib|server|client|api)\//i.test(path)) score += 4;
+  if (/(^|\/)(main|index|app|server|cli|entry|router|routes|controller|service|worker)\.[^.]+$/i.test(path)) score += 6;
+  if (/(^|\/)(auth|config|database|db|models?|components?|middleware|utils?)\//i.test(path)) score += 2;
+  if (/(test|spec|mock|fixture|generated|\.d\.ts)/i.test(path)) score -= 5;
+  return score;
+}
+
+function selectSourcePaths(filePaths) {
+  return filePaths
+    .map((path) => ({ path, score: scoreSourcePath(path) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path))
+    .slice(0, MAX_SOURCE_FILES)
+    .map((entry) => entry.path);
+}
+
+async function fetchSourceFiles(ref, paths, branch) {
+  const files = [];
+  let totalChars = 0;
+  let cursor = 0;
+  async function worker() {
+    while (cursor < paths.length) {
+      const path = paths[cursor++];
+      if (totalChars >= MAX_SOURCE_CONTEXT_CHARS) return;
+      try {
+        const content = (await fetchFileContent(ref, path, branch)).slice(0, MAX_SOURCE_FILE_CHARS);
+        const remaining = MAX_SOURCE_CONTEXT_CHARS - totalChars;
+        const text = content.slice(0, remaining);
+        if (text.trim()) {
+          files.push({ path, content: text });
+          totalChars += text.length;
+        }
+      } catch (err) {
+        logger.warn({ err, path }, "Skipping unreadable source file");
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(4, paths.length) }, () => worker()));
+  return files.sort((a, b) => paths.indexOf(a.path) - paths.indexOf(b.path));
+}
 
 function computeHealthScore({ hasReadme, license, filePaths, pushedAt }) {
   let score = 0;
@@ -58,6 +109,8 @@ function createIngestionWorker(io) {
         const manifest = manifestPath
           ? await fetchFileContent(ref, manifestPath, metadata.defaultBranch).catch(() => null)
           : null;
+        const sourcePaths = selectSourcePaths(filePaths);
+        const sourceFiles = await fetchSourceFiles(ref, sourcePaths, metadata.defaultBranch);
 
         await upsertRepository({
           owner,
@@ -78,7 +131,7 @@ function createIngestionWorker(io) {
         await updateAnalysisJob(jobId, { status: "analyzing", fileCount: filePaths.length });
         emitProgress(jobId, "analyzing");
 
-        const analysis = await analyzeRepository({ metadata, filePaths, readme, languages, manifest });
+        const analysis = await analyzeRepository({ metadata, filePaths, readme, languages, manifest, sourceFiles });
         const healthScore = computeHealthScore({
           hasReadme: Boolean(readme),
           license: metadata.license,
@@ -104,4 +157,4 @@ function createIngestionWorker(io) {
   );
 }
 
-module.exports = { createIngestionWorker };
+module.exports = { createIngestionWorker, selectSourcePaths };

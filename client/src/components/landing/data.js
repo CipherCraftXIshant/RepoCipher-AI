@@ -171,16 +171,6 @@ export const ARCHITECTURE_NODES = {
   database: { label: "Database", icon: IconDatabase },
 };
 
-/** Very small owner/repo parser — accepts full GitHub URLs or the short form. */
-export function parseRepoInput(raw) {
-  const value = raw.trim().replace(/\/+$/, "");
-  if (!value) return null;
+import { parseGithubUrl } from "../../lib/github";
 
-  const urlMatch = value.match(/^(?:https?:\/\/)?(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+)/i);
-  if (urlMatch) return { owner: urlMatch[1], repo: urlMatch[2] };
-
-  const shortMatch = value.match(/^([\w.-]+)\/([\w.-]+)$/);
-  if (shortMatch) return { owner: shortMatch[1], repo: shortMatch[2] };
-
-  return null;
-}
+export const parseRepoInput = parseGithubUrl;

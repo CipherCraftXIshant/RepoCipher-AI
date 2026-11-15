@@ -51,7 +51,7 @@ function isValidEmail(email) {
 }
 
 async function signup(req, res) {
-  const { email, password } = req.body ?? {};
+  const { email, password, displayName } = req.body ?? {};
   if (typeof email !== "string" || !isValidEmail(email)) {
     throw new HttpError(400, "A valid email is required");
   }
@@ -65,7 +65,8 @@ async function signup(req, res) {
   }
 
   const passwordHash = await hashPassword(password);
-  const user = await createUserWithPassword(email.toLowerCase(), passwordHash);
+  const name = typeof displayName === "string" && displayName.trim() ? displayName.trim() : null;
+  const user = await createUserWithPassword(email.toLowerCase(), passwordHash, name);
   const accessToken = await issueTokens(res, user.id);
 
   res.status(201).json({ accessToken, user: toPublicUser(user) });

@@ -4,6 +4,7 @@ import { Button } from "../ui/Button";
 import { Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 import { IconGithub } from "../ui/Icons";
 import { useNavigate } from "react-router-dom";
+import { parseGithubUrl } from "../../lib/github";
 
 export function AnalyzeRepoModal({ open, onOpenChange, onAnalyze }) {
   const [url, setUrl] = useState("");
@@ -11,19 +12,10 @@ export function AnalyzeRepoModal({ open, onOpenChange, onAnalyze }) {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Basic validation for GitHub URL or owner/repo format
-  const isValidGitHubUrl = (input) => {
-    const trimmed = input.trim();
-    if (!trimmed) return false;
-    // matches https://github.com/owner/repo or github.com/owner/repo or owner/repo
-    const fullUrlRegex = /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+(\/.*)?$/;
-    const shorthandRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
-    return fullUrlRegex.test(trimmed) || shorthandRegex.test(trimmed);
-  };
+  const parsed = parseGithubUrl(url);
+  const isValid = Boolean(parsed);
 
-  const isValid = isValidGitHubUrl(url);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) {
       setError("Please enter a valid GitHub repository URL (e.g., https://github.com/facebook/react)");
@@ -33,17 +25,18 @@ export function AnalyzeRepoModal({ open, onOpenChange, onAnalyze }) {
     setError("");
     setLoading(true);
 
-    if (onAnalyze) {
-      onAnalyze(url);
-      setLoading(false);
+    try {
+      if (onAnalyze) {
+        await onAnalyze(url.trim());
+      } else {
+        navigate(`/app?repo=${encodeURIComponent(url.trim())}`);
+      }
       setUrl("");
       onOpenChange(false);
-    } else {
-      setTimeout(() => {
-        setLoading(false);
-        onOpenChange(false);
-        navigate(`/app?repo=${encodeURIComponent(url.trim())}`);
-      }, 400);
+    } catch (err) {
+      setError(err.message || "Could not start analysis. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 

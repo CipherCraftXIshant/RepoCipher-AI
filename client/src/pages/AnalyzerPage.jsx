@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   ApiError,
   createAnalysis,
@@ -108,11 +108,13 @@ function ProgressPipeline({ status }) {
 
 export function AnalyzerPage() {
   const { user, withAuth } = useAuth();
+  const { id: routeId } = useParams();
   const [searchParams] = useSearchParams();
-  const [url, setUrl] = useState(() => searchParams.get("repo") || "");
+  const isObjectId = routeId && /^[0-9a-fA-F]{24}$/.test(routeId);
+  const [url, setUrl] = useState(() => searchParams.get("repo") || (!isObjectId ? (routeId?.replace("-", "/") || "") : ""));
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [jobId, setJobId] = useState(() => searchParams.get("job"));
+  const [jobId, setJobId] = useState(() => isObjectId ? routeId : searchParams.get("job"));
   const [job, setJob] = useState(null);
   const [interviewQuestions, setInterviewQuestions] = useState(null);
   const [generatingInterview, setGeneratingInterview] = useState(false);
@@ -182,11 +184,11 @@ export function AnalyzerPage() {
     };
   }, [jobId, withAuth]);
 
-  // If URL was provided in query string upon mount, trigger analysis
+  // If URL was provided in query string or route param upon mount, trigger analysis
   useEffect(() => {
-    const queryRepo = searchParams.get("repo");
-    if (queryRepo && !jobId && !submitting && !job) {
-      void handleTriggerRepo(queryRepo);
+    const targetRepo = searchParams.get("repo") || (!isObjectId ? routeId?.replace("-", "/") : null);
+    if (targetRepo && !jobId && !submitting && !job) {
+      void handleTriggerRepo(targetRepo);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

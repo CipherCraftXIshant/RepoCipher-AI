@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useMemo, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MoreHorizontal,
   ExternalLink,
@@ -29,25 +29,74 @@ import {
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 
+function RepoActionsMenu({ repo, onOpen, onReanalyze, onRename, onDelete }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-slate-400 hover:text-slate-700"
+        >
+          <MoreHorizontal className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="right" className="w-36">
+        <DropdownMenuItem onSelect={() => onOpen(repo)}>
+          <ExternalLink className="w-3.5 h-3.5" />
+          <span>Open</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onReanalyze(repo)}>
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Re-analyze</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onRename(repo)}>
+          <Pencil className="w-3.5 h-3.5" />
+          <span>Rename</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem destructive onSelect={() => onDelete(repo)}>
+          <Trash2 className="w-3.5 h-3.5" />
+          <span>Delete</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function RepoTable({
   repos = [],
-  _onOpenRepo,
+  onOpenRepo,
   onReanalyze,
   onRename,
   onDelete,
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [localRepos, setLocalRepos] = useState(repos);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setLocalRepos(repos);
+  }, [repos]);
 
   const filteredRepos = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return localRepos;
     return localRepos.filter(
       (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.stack.some((s) => s.toLowerCase().includes(q))
+        r.name?.toLowerCase().includes(q) ||
+        r.fullName?.toLowerCase().includes(q) ||
+        (Array.isArray(r.stack) && r.stack.some((s) => s.toLowerCase().includes(q)))
     );
   }, [localRepos, searchQuery]);
+
+  const handleOpen = (repo) => {
+    if (onOpenRepo) {
+      onOpenRepo(repo);
+    } else {
+      navigate(`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`);
+    }
+  };
 
   const handleDelete = (repo) => {
     if (window.confirm(`Remove ${repo.name} from recent repositories?`)) {
@@ -70,7 +119,7 @@ export function RepoTable({
     if (onReanalyze) {
       onReanalyze(repo);
     } else {
-      alert(`Re-analyzing ${repo.name}...`);
+      navigate(`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`);
     }
   };
 
@@ -111,7 +160,7 @@ export function RepoTable({
           </div>
         ) : (
           <>
-            {/* Desktop Table View (Hidden on mobile) */}
+            {/* Desktop Table View */}
             <div className="hidden md:block">
               <Table>
                 <TableHeader>
@@ -123,172 +172,126 @@ export function RepoTable({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredRepos.map((repo) => (
-                    <TableRow key={repo.id} className="group">
-                      <TableCell className="font-medium">
-                        <Link
-                          to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
-                          className="flex items-center gap-2.5 text-slate-900 group-hover:text-primary-600 font-semibold no-underline"
-                        >
-                          <div className="p-1.5 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-                            <FolderGit2 className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span>{repo.name}</span>
-                              {repo.healthScore && (
-                                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/50">
-                                  {repo.healthScore}%
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[11px] font-normal text-slate-400 block">
-                              {repo.fullName || `ciphercraft/${repo.name}`}
-                            </span>
-                          </div>
-                        </Link>
-                      </TableCell>
-
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {repo.stack.map((item) => (
-                            <span
-                              key={item}
-                              className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium"
-                            >
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                      </TableCell>
-
-                      <TableCell className="text-xs text-slate-500 font-medium">
-                        {repo.analyzed}
-                      </TableCell>
-
-                      <TableCell className="text-right pr-4">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            as={Link}
+                  {filteredRepos.map((repo) => {
+                    const stackList = Array.isArray(repo.stack) ? repo.stack : [];
+                    return (
+                      <TableRow key={repo.id} className="group">
+                        <TableCell className="font-medium">
+                          <Link
                             to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs font-semibold text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-2.5 py-1 rounded-lg"
+                            className="flex items-center gap-2.5 text-slate-900 group-hover:text-primary-600 font-semibold no-underline"
                           >
-                            Open
-                          </Button>
+                            <div className="p-1.5 rounded-lg bg-slate-100 text-slate-600 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                              <FolderGit2 className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span>{repo.name}</span>
+                                {repo.healthScore && (
+                                  <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/50">
+                                    {repo.healthScore}%
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[11px] font-normal text-slate-400 block">
+                                {repo.fullName || repo.name}
+                              </span>
+                            </div>
+                          </Link>
+                        </TableCell>
 
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                className="text-slate-400 hover:text-slate-700"
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {stackList.map((item) => (
+                              <span
+                                key={item}
+                                className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium"
                               >
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="right" className="w-36">
-                              <DropdownMenuItem
-                                onSelect={() => (window.location.href = `/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`)}
-                              >
-                                <ExternalLink className="w-3.5 h-3.5" />
-                                <span>Open</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => handleReanalyze(repo)}>
-                                <RotateCcw className="w-3.5 h-3.5" />
-                                <span>Re-analyze</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => handleRename(repo)}>
-                                <Pencil className="w-3.5 h-3.5" />
-                                <span>Rename</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                destructive
-                                onSelect={() => handleDelete(repo)}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span>Delete</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="text-xs text-slate-500 font-medium">
+                          {repo.analyzed}
+                        </TableCell>
+
+                        <TableCell className="text-right pr-4">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              as={Link}
+                              to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs font-semibold text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-2.5 py-1 rounded-lg"
+                            >
+                              Open
+                            </Button>
+
+                            <RepoActionsMenu
+                              repo={repo}
+                              onOpen={handleOpen}
+                              onReanalyze={handleReanalyze}
+                              onRename={handleRename}
+                              onDelete={handleDelete}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
 
-            {/* Mobile Stacked Card View (Shown on small screens) */}
+            {/* Mobile Stacked Card View */}
             <div className="md:hidden divide-y divide-slate-100">
-              {filteredRepos.map((repo) => (
-                <div key={repo.id} className="p-4 space-y-2.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <Link
-                      to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
-                      className="flex items-center gap-2 text-slate-900 font-semibold text-sm no-underline"
-                    >
-                      <FolderGit2 className="w-4 h-4 text-slate-400" />
-                      <span>{repo.name}</span>
-                    </Link>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="right" className="w-36">
-                        <DropdownMenuItem
-                          onSelect={() => (window.location.href = `/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`)}
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Open</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleReanalyze(repo)}>
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Re-analyze</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => handleRename(repo)}>
-                          <Pencil className="w-3.5 h-3.5" />
-                          <span>Rename</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          destructive
-                          onSelect={() => handleDelete(repo)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1">
-                    {repo.stack.map((item) => (
-                      <span
-                        key={item}
-                        className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium"
+              {filteredRepos.map((repo) => {
+                const stackList = Array.isArray(repo.stack) ? repo.stack : [];
+                return (
+                  <div key={repo.id} className="p-4 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
+                        className="flex items-center gap-2 text-slate-900 font-semibold text-sm no-underline"
                       >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
+                        <FolderGit2 className="w-4 h-4 text-slate-400" />
+                        <span>{repo.name}</span>
+                      </Link>
 
-                  <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                    <span>Analyzed {repo.analyzed}</span>
-                    <Link
-                      to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
-                      className="text-primary-600 font-semibold text-xs no-underline"
-                    >
-                      View analysis →
-                    </Link>
+                      <RepoActionsMenu
+                        repo={repo}
+                        onOpen={handleOpen}
+                        onReanalyze={handleReanalyze}
+                        onRename={handleRename}
+                        onDelete={handleDelete}
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-1">
+                      {stackList.map((item) => (
+                        <span
+                          key={item}
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+                      <span>Analyzed {repo.analyzed}</span>
+                      <Link
+                        to={`/app?repo=${encodeURIComponent(repo.fullName || repo.name)}`}
+                        className="text-primary-600 font-semibold text-xs no-underline"
+                      >
+                        View analysis →
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

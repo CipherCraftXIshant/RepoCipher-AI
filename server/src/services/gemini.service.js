@@ -5,14 +5,17 @@ const client = new GoogleGenAI({ apiKey: env.geminiApiKey });
 
 const ANALYSIS_SYSTEM_INSTRUCTION =
   "You are a senior software engineer producing a detailed onboarding dashboard for a GitHub repository. " +
-  "Given the repository metadata, language breakdown, file tree, README, and root manifest file, analyze the " +
+  "Given the repository metadata, language breakdown, file tree, README, root manifest file, and representative " +
+  "source file excerpts, analyze the " +
   "project in depth: what it does, its tech stack, its architecture and request/data flow, its key entry " +
   "point files, its dependencies, its important directories (including notable individual files within each), " +
   "how to set it up and run it locally, and any code-quality or risk observations (e.g. missing tests, missing " +
   "CI, thin error handling, outdated-looking dependencies, unclear structure). " +
   "Be concise and factual — do not speculate about anything not evidenced by the provided context. " +
   "Only report dependency names and versions that actually appear in the provided manifest file; do not " +
-  "invent version numbers. Only raise a risk if it is actually evidenced by the file tree, README, or manifest — " +
+  "invent version numbers. Use source excerpts as primary evidence and reference their paths in explanations and " +
+  "risk descriptions. The file tree is complete when available, but source content is a size-limited sample; " +
+  "never claim every implementation file was inspected. Only raise a risk if evidenced by provided context — " +
   "an empty risks list is fine for a well-maintained project.";
 
 const ANALYSIS_RESPONSE_SCHEMA = {
@@ -113,7 +116,7 @@ const ANALYSIS_RESPONSE_SCHEMA = {
   propertyOrdering: ["overview", "stack", "architecture", "entryPoints", "dependencies", "directories", "setup", "risks"],
 };
 
-function buildRepoContext({ metadata, filePaths, readme, languages, manifest }) {
+function buildRepoContext({ metadata, filePaths, readme, languages, manifest, sourceFiles = [] }) {
   const treeListing = filePaths.slice(0, 1500).join("\n");
   const truncationNote =
     filePaths.length > 1500 ? `\n... and ${filePaths.length - 1500} more files` : "";
@@ -135,6 +138,9 @@ function buildRepoContext({ metadata, filePaths, readme, languages, manifest }) 
     treeListing + truncationNote,
     readme ? `\nREADME contents:\n${readme.slice(0, 12000)}` : null,
     manifest ? `\nRoot manifest file contents:\n${manifest.slice(0, 4000)}` : null,
+    sourceFiles.length
+      ? `\nRepresentative source file excerpts (${sourceFiles.length} files; content is size-limited):\n${sourceFiles.map((file) => `\n--- ${file.path} ---\n${file.content}`).join("\n")}`
+      : "\nNo readable source file excerpts were available; base code-level claims only on the file tree and documentation.",
   ]
     .filter(Boolean)
     .join("\n");
