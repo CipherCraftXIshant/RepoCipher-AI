@@ -2,7 +2,7 @@ const { HttpError } = require("../middleware/errorHandler");
 const { logActivity } = require("../models/activity.model");
 const { createChatMessage, listChatMessages } = require("../models/chat.model");
 const { getAnalysisJobWithRepository } = require("../models/repository.model");
-const { chatAboutRepository } = require("../services/gemini.service");
+const { chatAboutRepository, generateWithFallback } = require("../services/gemini.service");
 
 const HISTORY_LIMIT = 20;
 
@@ -65,4 +65,31 @@ async function sendChatMessage(req, res) {
   res.status(201).json({ userMessage, modelMessage });
 }
 
-module.exports = { listChatMessagesForJob, sendChatMessage };
+async function sendGeneralAssistantMessage(req, res) {
+  const { message, history = [] } = req.body ?? {};
+  if (typeof message !== "string" || !message.trim()) {
+    throw new HttpError(400, "Body must include a non-empty 'message' field");
+  }
+
+  const prompt = [
+    { role: "user", parts: [{ text: "You are RepoCipher AI Assistant. You help developers understand software architecture, repository structures, debugging, best practices, and codebases. Give helpful, concise answers with markdown and code snippets." }] },
+    { role: "model", parts: [{ text: "Understood! I'm ready to help with any repository, codebase, or software architecture questions." }] },
+    ...history.slice(-10).map((m) => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.content }] })),
+    { role: "user", parts: [{ text: message.trim() }] },
+  ];
+
+  const response = await generateWithFallback({
+    contents: prompt,
+    config: {
+      maxOutputTokens: 2048,
+    },
+  });
+
+  const reply = response.text || "I couldn't process that question. Please try rephrasing.";
+  const userMessage = { id: `u-${Date.now()}`, role: "user", content: message.trim(), createdAt: new Date().toISOString() };
+  const modelMessage = { id: `m-${Date.now()}`, role: "model", content: reply, createdAt: new Date().toISOString() };
+
+  res.status(201).json({ userMessage, modelMessage });
+}
+
+module.exports = { listChatMessagesForJob, sendChatMessage, sendGeneralAssistantMessage };

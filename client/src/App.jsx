@@ -20,6 +20,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AnalyzerPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/architecture" element={<AnalyzerPage />} />
           <Route path="/repository/:id" element={<AnalyzerPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>

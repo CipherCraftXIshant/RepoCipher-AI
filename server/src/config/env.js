@@ -16,7 +16,7 @@ const env = {
   mongoUri: required("MONGODB_URI"),
   redisUrl: required("REDIS_URL"),
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
-  geminiModel: process.env.GEMINI_MODEL ?? "gemini-3.8-flash",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite",
   githubToken: process.env.GITHUB_TOKEN ?? "",
 
   jwtAccessSecret: required("JWT_ACCESS_SECRET"),

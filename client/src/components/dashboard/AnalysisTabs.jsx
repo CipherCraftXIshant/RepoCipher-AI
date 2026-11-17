@@ -40,6 +40,12 @@ export function AnalysisTabs({
   const active = ANALYSIS_TABS.find((tab) => tab.id === activeTab) ?? ANALYSIS_TABS[0];
 
   useEffect(() => {
+    if (initialTab && ANALYSIS_TABS.some((t) => t.id === initialTab)) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  useEffect(() => {
     onTabChange?.(activeTab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);

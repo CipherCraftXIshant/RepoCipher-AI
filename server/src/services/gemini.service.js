@@ -1,8 +1,38 @@
 const { GoogleGenAI, Type } = require("@google/genai");
 const { env } = require("../config/env");
+const { logger } = require("../config/logger");
 
 const client = new GoogleGenAI({ apiKey: env.geminiApiKey });
-const GEMINI_MODEL = env.geminiModel || "gemini-3.8-flash";
+
+const CANDIDATE_MODELS = [
+  env.geminiModel || "gemini-3.1-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-3.8-flash",
+  "gemini-flash-latest",
+].filter(Boolean);
+
+async function generateWithFallback({ contents, config, timeoutMs = 35000 }) {
+  const models = Array.from(new Set(CANDIDATE_MODELS));
+  let lastError = null;
+
+  for (const model of models) {
+    try {
+      const response = await Promise.race([
+        client.models.generateContent({ model, contents, config }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout after ${timeoutMs}ms on model ${model}`)), timeoutMs),
+        ),
+      ]);
+      if (response && response.text) {
+        return response;
+      }
+    } catch (err) {
+      lastError = err;
+      logger.warn({ model, error: err.message }, "Gemini generation failed on model, trying fallback");
+    }
+  }
+  throw lastError || new Error("All Gemini model attempts failed");
+}
 
 const ANALYSIS_SYSTEM_INSTRUCTION =
   "You are a senior software engineer producing a detailed onboarding dashboard for a GitHub repository. " +
@@ -150,8 +180,7 @@ function buildRepoContext({ metadata, filePaths, readme, languages, manifest, so
 async function analyzeRepository(input) {
   const userContent = buildRepoContext(input);
 
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
+  const response = await generateWithFallback({
     contents: userContent,
     config: {
       systemInstruction: ANALYSIS_SYSTEM_INSTRUCTION,
@@ -214,8 +243,7 @@ async function chatAboutRepository({ metadata, analysis, history, message }) {
     { role: "user", parts: [{ text: message }] },
   ];
 
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
+  const response = await generateWithFallback({
     contents,
     config: {
       systemInstruction: CHAT_SYSTEM_INSTRUCTION,
@@ -260,8 +288,7 @@ const INTERVIEW_RESPONSE_SCHEMA = {
 async function generateInterviewQuestions({ metadata, analysis }) {
   const contextPreamble = buildAnalysisContext({ metadata, analysis });
 
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
+  const response = await generateWithFallback({
     contents: `Repository context:\n\n${contextPreamble}`,
     config: {
       systemInstruction: INTERVIEW_SYSTEM_INSTRUCTION,
@@ -293,8 +320,7 @@ async function runRepositoryInterview({ metadata, analysis, history, answer }) {
         : "Briefly assess the candidate's latest answer with specific strengths and one improvement. Then ask the next question. Keep the question distinct from previous ones.",
   ].filter(Boolean).join("\n\n");
 
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
+  const response = await generateWithFallback({
     contents: prompt,
     config: {
       systemInstruction: "You are a fair, encouraging senior engineer interviewer. Base questions and answer feedback only on the supplied repository analysis. Do not invent code details.",
@@ -311,4 +337,10 @@ async function runRepositoryInterview({ metadata, analysis, history, answer }) {
   return JSON.parse(response.text);
 }
 
-module.exports = { analyzeRepository, chatAboutRepository, generateInterviewQuestions, runRepositoryInterview };
+module.exports = {
+  analyzeRepository,
+  chatAboutRepository,
+  generateInterviewQuestions,
+  runRepositoryInterview,
+  generateWithFallback,
+};

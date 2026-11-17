@@ -14,7 +14,7 @@ export function AuthCallbackPage() {
   }, [completeGoogleLogin]);
 
   if (failed) return <Navigate to="/login" replace />;
-  if (done) return <Navigate to="/app" replace />;
+  if (done) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="flex items-center justify-center min-h-[60svh] text-text dark:text-text-dark">

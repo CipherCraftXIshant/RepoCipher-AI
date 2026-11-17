@@ -100,6 +100,15 @@ export async function sendChatMessage(accessToken, jobId, message) {
   return parseJsonOrThrow(res);
 }
 
+export async function sendGeneralChatMessage(accessToken, message, history = []) {
+  const res = await fetch("/api/chat/assistant", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
+    body: JSON.stringify({ message, history }),
+  });
+  return parseJsonOrThrow(res);
+}
+
 export async function generateInterviewQuestions(accessToken, jobId) {
   const res = await fetch(`/api/analyses/${jobId}/interview`, {
     method: "POST",

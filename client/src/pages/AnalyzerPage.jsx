@@ -7,11 +7,12 @@ import {
   runInterviewTurn,
   getAnalysis,
   touchAnalysisViewed,
+  getDashboard,
 } from "../api";
 import { useAuth } from "../auth/AuthContext";
 import { Sidebar } from "../components/dashboard/Sidebar";
 import { AnalysisTabs } from "../components/dashboard/AnalysisTabs";
-import { ChatWidget } from "../components/chat/ChatWidget";
+import { GlobalAIChatbot } from "../components/chat/GlobalAIChatbot";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
@@ -144,6 +145,25 @@ export function AnalyzerPage() {
 
   const handleInterviewTurn = (history, answer = "") =>
     withAuth((token) => runInterviewTurn(token, jobId, history, answer));
+
+  // If no jobId in URL, automatically load the user's latest completed repository
+  useEffect(() => {
+    if (jobId || isObjectId) return;
+    let isCancelled = false;
+    withAuth(getDashboard)
+      .then((dash) => {
+        if (!isCancelled && dash?.recent?.length > 0) {
+          const target = dash.recent.find((j) => j.status === "completed") || dash.recent[0];
+          if (target?.id) {
+            setJobId(target.id);
+          }
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isCancelled = true;
+    };
+  }, [jobId, isObjectId, withAuth]);
 
   useEffect(() => {
     if (!jobId) return;
@@ -413,7 +433,7 @@ export function AnalyzerPage() {
                   <AnalysisTabs
                     analysis={job.analysis}
                     languages={job.repository.languages}
-                    initialTab={job.lastViewedTab}
+                    initialTab={searchParams.get("tab") || job.lastViewedTab || "overview"}
                     onTabChange={handleTabChange}
                     interviewQuestions={interviewQuestions}
                     onGenerateInterview={handleGenerateInterview}
@@ -422,7 +442,10 @@ export function AnalyzerPage() {
                   />
 
                   {/* Interactive AI Codebase Chat Widget */}
-                  <ChatWidget jobId={jobId} />
+                  <GlobalAIChatbot
+                    activeJobId={jobId}
+                    activeRepoName={job?.repository?.fullName}
+                  />
                 </div>
               )}
             </div>

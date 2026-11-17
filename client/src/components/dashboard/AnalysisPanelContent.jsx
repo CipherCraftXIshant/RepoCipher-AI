@@ -2,6 +2,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { MARKDOWN_COMPONENTS } from "../../lib/markdown";
 import { IconChevronDown, IconFile, IconLoader } from "../ui/Icons";
+import { ArchitectureMapView } from "../architecture/ArchitectureMapView";
 
 function EmptyState({ label }) {
   return <p className="text-sm text-text dark:text-text-dark">No {label} found for this repository.</p>;
@@ -158,23 +159,14 @@ export function AnalysisPanelContent({
   }
 
   if (tabId === "architecture") {
-    if (!analysis.architecture?.length) return <EmptyState label="architecture" />;
     return (
-      <div className="flex flex-col gap-3">
-        {analysis.architecture.map((node, i) => (
-          <div key={node.label} className="flex gap-3 items-start">
-            <div className="flex flex-col items-center shrink-0">
-              <span className="px-3.5 py-2 rounded-lg border border-border dark:border-border-dark bg-accent-bg dark:bg-accent-bg-dark text-heading dark:text-heading-dark text-sm font-medium whitespace-nowrap">
-                {node.label}
-              </span>
-              {i < analysis.architecture.length - 1 && (
-                <span className="text-accent dark:text-accent-dark my-1" aria-hidden="true">↓</span>
-              )}
-            </div>
-            <p className="text-[13px] text-text dark:text-text-dark leading-relaxed mt-2">{node.description}</p>
-          </div>
-        ))}
-      </div>
+      <ArchitectureMapView
+        architecture={analysis.architecture}
+        entryPoints={analysis.entryPoints}
+        dependencies={analysis.dependencies}
+        stack={analysis.stack}
+        repoName={analysis.name}
+      />
     );
   }
 

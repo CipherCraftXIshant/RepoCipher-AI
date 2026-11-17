@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const { analysesRouter } = require("./analyses.route");
 const { authRouter } = require("./auth.route");
+const { chatRouter } = require("./chat.route");
 const { dashboardRouter } = require("./dashboard.route");
 const { healthRouter } = require("./health.route");
 const { usersRouter } = require("./users.route");
@@ -11,6 +12,7 @@ router.use("/health", healthRouter);
 router.use("/api/auth", authRouter);
 router.use("/api/users", usersRouter);
 router.use("/api/analyses", analysesRouter);
+router.use("/api/chat", chatRouter);
 router.use("/api/dashboard", dashboardRouter);
 
 module.exports = { router };
