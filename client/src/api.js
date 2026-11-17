@@ -19,8 +19,15 @@ function authHeaders(accessToken) {
   return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 }
 
+function apiFetch(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    credentials: "include",
+  });
+}
+
 export async function signupRequest(email, password, displayName) {
-  const res = await fetch("/api/auth/signup", {
+  const res = await apiFetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, displayName }),
@@ -29,7 +36,7 @@ export async function signupRequest(email, password, displayName) {
 }
 
 export async function loginRequest(email, password) {
-  const res = await fetch("/api/auth/login", {
+  const res = await apiFetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -38,21 +45,21 @@ export async function loginRequest(email, password) {
 }
 
 export async function refreshRequest() {
-  const res = await fetch("/api/auth/refresh", { method: "POST" });
+  const res = await apiFetch("/api/auth/refresh", { method: "POST" });
   return parseJsonOrThrow(res);
 }
 
 export async function logoutRequest() {
-  await fetch("/api/auth/logout", { method: "POST" });
+  await apiFetch("/api/auth/logout", { method: "POST" });
 }
 
 export async function fetchMe(accessToken) {
-  const res = await fetch("/api/auth/me", { headers: authHeaders(accessToken) });
+  const res = await apiFetch("/api/auth/me", { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
 export async function createAnalysis(accessToken, url) {
-  const res = await fetch("/api/analyses", {
+  const res = await apiFetch("/api/analyses", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
     body: JSON.stringify({ url }),
@@ -61,17 +68,17 @@ export async function createAnalysis(accessToken, url) {
 }
 
 export async function getAnalysis(accessToken, id) {
-  const res = await fetch(`/api/analyses/${id}`, { headers: authHeaders(accessToken) });
+  const res = await apiFetch(`/api/analyses/${id}`, { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
 export async function listAnalyses(accessToken) {
-  const res = await fetch("/api/analyses", { headers: authHeaders(accessToken) });
+  const res = await apiFetch("/api/analyses", { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
 export async function deleteAnalysis(accessToken, id) {
-  const res = await fetch(`/api/analyses/${id}`, {
+  const res = await apiFetch(`/api/analyses/${id}`, {
     method: "DELETE",
     headers: authHeaders(accessToken),
   });
@@ -79,7 +86,7 @@ export async function deleteAnalysis(accessToken, id) {
 }
 
 export async function touchAnalysisViewed(accessToken, id, tab) {
-  await fetch(`/api/analyses/${id}/viewed`, {
+  await apiFetch(`/api/analyses/${id}/viewed`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
     body: JSON.stringify({ tab }),
@@ -87,12 +94,12 @@ export async function touchAnalysisViewed(accessToken, id, tab) {
 }
 
 export async function getChatMessages(accessToken, jobId) {
-  const res = await fetch(`/api/analyses/${jobId}/chat`, { headers: authHeaders(accessToken) });
+  const res = await apiFetch(`/api/analyses/${jobId}/chat`, { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
 export async function sendChatMessage(accessToken, jobId, message) {
-  const res = await fetch(`/api/analyses/${jobId}/chat`, {
+  const res = await apiFetch(`/api/analyses/${jobId}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
     body: JSON.stringify({ message }),
@@ -101,7 +108,7 @@ export async function sendChatMessage(accessToken, jobId, message) {
 }
 
 export async function sendGeneralChatMessage(accessToken, message, history = []) {
-  const res = await fetch("/api/chat/assistant", {
+  const res = await apiFetch("/api/chat/assistant", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
     body: JSON.stringify({ message, history }),
@@ -110,7 +117,7 @@ export async function sendGeneralChatMessage(accessToken, message, history = [])
 }
 
 export async function generateInterviewQuestions(accessToken, jobId) {
-  const res = await fetch(`/api/analyses/${jobId}/interview`, {
+  const res = await apiFetch(`/api/analyses/${jobId}/interview`, {
     method: "POST",
     headers: authHeaders(accessToken),
   });
@@ -118,7 +125,7 @@ export async function generateInterviewQuestions(accessToken, jobId) {
 }
 
 export async function runInterviewTurn(accessToken, jobId, history, answer = "") {
-  const res = await fetch(`/api/analyses/${jobId}/interview/session`, {
+  const res = await apiFetch(`/api/analyses/${jobId}/interview/session`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(accessToken) },
     body: JSON.stringify({ history, answer }),
@@ -127,14 +134,14 @@ export async function runInterviewTurn(accessToken, jobId, history, answer = "")
 }
 
 export async function getDashboard(accessToken) {
-  const res = await fetch("/api/dashboard", { headers: authHeaders(accessToken) });
+  const res = await apiFetch("/api/dashboard", { headers: authHeaders(accessToken) });
   return parseJsonOrThrow(res);
 }
 
 export async function uploadAvatar(accessToken, file) {
   const formData = new FormData();
   formData.append("avatar", file);
-  const res = await fetch("/api/users/me/avatar", {
+  const res = await apiFetch("/api/users/me/avatar", {
     method: "POST",
     headers: authHeaders(accessToken),
     body: formData,

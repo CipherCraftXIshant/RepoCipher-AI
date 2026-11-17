@@ -8,6 +8,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SignupPage } from "./pages/SignupPage";
+import { InterviewPage } from "./pages/InterviewPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AnalyzerPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/interview" element={<InterviewPage />} />
           <Route path="/architecture" element={<AnalyzerPage />} />
           <Route path="/repository/:id" element={<AnalyzerPage />} />
           <Route path="/profile" element={<ProfilePage />} />

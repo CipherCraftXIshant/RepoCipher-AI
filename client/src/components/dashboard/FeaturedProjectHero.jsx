@@ -14,6 +14,7 @@ import {
   Sparkles,
   CheckCircle2,
   RefreshCw,
+  GraduationCap,
 } from "lucide-react";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
@@ -93,11 +94,11 @@ export function FeaturedProjectHero({ job, onReanalyze }) {
             </a>
           )}
           <Link
-            to={`/app?job=${encodeURIComponent(job.id)}&tab=architecture`}
+            to={`/interview?job=${encodeURIComponent(job.id)}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-xs font-bold text-indigo-700 transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Architecture Map</span>
+            <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Practice Interview</span>
           </Link>
           <Link
             to={`/app?job=${encodeURIComponent(job.id)}`}

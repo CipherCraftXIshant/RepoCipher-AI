@@ -14,6 +14,7 @@ import {
   LogOut,
   ShieldCheck,
   ExternalLink,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/Avatar";
@@ -49,10 +50,10 @@ export function Sidebar({ mobileOpen = false, onClose, user, repoCount = 0 }) {
       badge: repoCount > 0 ? repoCount : null,
     },
     {
-      name: "Architecture Maps",
-      href: "/app?tab=architecture",
-      icon: Code2,
-      active: location.search.includes("tab=architecture"),
+      name: "AI Interview Prep",
+      href: "/interview",
+      icon: GraduationCap,
+      active: location.pathname === "/interview",
       badge: "AI",
     },
     {

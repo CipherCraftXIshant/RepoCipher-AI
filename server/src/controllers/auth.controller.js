@@ -79,6 +79,9 @@ async function login(req, res) {
   }
 
   const user = await findUserByEmail(email.toLowerCase());
+  if (user && !user.passwordHash) {
+    throw new HttpError(400, "This email is registered via Google OAuth. Please click 'Continue with Google'.");
+  }
   if (!user || !user.passwordHash) {
     throw new HttpError(401, "Invalid email or password");
   }
