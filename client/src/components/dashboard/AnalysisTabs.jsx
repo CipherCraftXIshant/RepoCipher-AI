@@ -51,9 +51,9 @@ export function AnalysisTabs({
   }, [activeTab]);
 
   return (
-    <div className="grid md:grid-cols-[240px_1fr] rounded-2xl border border-border dark:border-border-dark bg-bg dark:bg-bg-dark overflow-hidden mt-8">
+    <div className="grid md:grid-cols-[240px_1fr] rounded-3xl border border-slate-800 bg-[#0D1322] overflow-hidden shadow-2xl mt-6 text-white">
       <div
-        className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible p-3 border-b md:border-b-0 md:border-r border-border dark:border-border-dark"
+        className="flex md:flex-col gap-1.5 overflow-x-auto md:overflow-visible p-3.5 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/60"
         role="tablist"
       >
         {ANALYSIS_TABS.map((tab) => {
@@ -66,10 +66,10 @@ export function AnalysisTabs({
               role="tab"
               aria-selected={isActive}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2.5 px-3.5 py-3 rounded-xl text-sm font-medium text-left whitespace-nowrap shrink-0 transition-colors duration-150 cursor-pointer ${
+              className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-left whitespace-nowrap shrink-0 transition-all duration-150 cursor-pointer ${
                 isActive
-                  ? "bg-accent-bg dark:bg-accent-bg-dark text-heading dark:text-heading-dark border border-accent-border dark:border-accent-border-dark"
-                  : "text-text dark:text-text-dark hover:text-heading dark:hover:text-heading-dark hover:bg-accent-bg/50 dark:hover:bg-accent-bg-dark/50 border border-transparent"
+                  ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white border border-indigo-500 shadow-md shadow-indigo-600/30"
+                  : "text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent"
               }`}
             >
               <Icon width={16} height={16} className="shrink-0" />
@@ -79,9 +79,9 @@ export function AnalysisTabs({
         })}
       </div>
 
-      <div className="p-6 sm:p-8">
-        <h3 className="text-lg font-medium text-heading dark:text-heading-dark mb-1.5">{active.label}</h3>
-        <p className="text-sm text-text dark:text-text-dark mb-6">{active.description}</p>
+      <div className="p-6 sm:p-8 bg-[#0D1322]">
+        <h3 className="text-xl font-bold text-white mb-1.5 tracking-tight">{active.label}</h3>
+        <p className="text-xs text-slate-400 mb-6 leading-relaxed">{active.description}</p>
         <div key={active.id}>
           <AnalysisPanelContent
             tabId={active.id}

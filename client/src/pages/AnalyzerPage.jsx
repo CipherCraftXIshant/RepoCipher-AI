@@ -48,22 +48,22 @@ function ProgressPipeline({ status }) {
   const activeIndex = status === "failed" ? STEPS.length : STEPS.indexOf(status);
 
   return (
-    <Card className="p-6 border-slate-200/90 shadow-card bg-white overflow-hidden">
+    <div className="p-6 rounded-3xl border border-slate-800/90 bg-[#0D1322] text-white shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-primary-50 text-primary-600">
-            <Loader2 className="w-5 h-5 animate-spin" />
+        <div className="flex items-center gap-2.5">
+          <div className="p-2.5 rounded-2xl bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 shadow-md">
+            <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
               AI Analysis In Progress
             </h3>
-            <p className="text-xs text-slate-500">
-              Generating full architecture topology and code risk audit.
+            <p className="text-xs text-slate-400">
+              Synthesizing full architecture topology, security boundaries, and code risk audit.
             </p>
           </div>
         </div>
-        <Badge variant="default" className="animate-pulse">
+        <Badge variant="default" className="animate-pulse bg-indigo-600 text-white border-0">
           {status.toUpperCase()}
         </Badge>
       </div>
@@ -78,32 +78,33 @@ function ProgressPipeline({ status }) {
           return (
             <div
               key={step}
-              className={`p-4 rounded-xl border transition-all duration-200 relative ${isDone
-                  ? "bg-emerald-50/50 border-emerald-200/80 text-emerald-900"
+              className={`p-4 rounded-2xl border transition-all duration-200 relative ${
+                isDone
+                  ? "bg-emerald-950/60 border-emerald-800/60 text-emerald-300"
                   : isActive
-                    ? "bg-primary-50/70 border-primary-300 ring-2 ring-primary-500/20 text-primary-900"
-                    : isFailed
-                      ? "bg-rose-50 border-rose-200 text-rose-900"
-                      : "bg-slate-50 border-slate-100 text-slate-400 opacity-70"
-                }`}
+                  ? "bg-indigo-950/70 border-indigo-600 ring-2 ring-indigo-500/20 text-indigo-200"
+                  : isFailed
+                  ? "bg-rose-950/70 border-rose-800 text-rose-300"
+                  : "bg-slate-950 border-slate-800/80 text-slate-500 opacity-70"
+              }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider">
                   Step {i + 1}
                 </span>
                 {isDone ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 ) : isActive ? (
-                  <Loader2 className="w-4 h-4 text-primary-600 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
                 ) : null}
               </div>
               <div className="font-semibold text-xs leading-snug">{info.label}</div>
-              <div className="text-[11px] text-slate-500 mt-1">{info.desc}</div>
+              <div className="text-[11px] text-slate-400 mt-1">{info.desc}</div>
             </div>
           );
         })}
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -243,7 +244,7 @@ export function AnalyzerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 flex text-slate-900 font-sans antialiased selection:bg-primary-100 selection:text-primary-900">
+    <div className="min-h-screen bg-[#080C14] flex text-slate-100 font-sans antialiased selection:bg-indigo-500/30 selection:text-white">
       {/* Persistent Left Sidebar */}
       <Sidebar
         user={user}
@@ -255,12 +256,12 @@ export function AnalyzerPage() {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto">
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
           {/* Top Bar Navigation */}
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
+          <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(true)}
-                className="lg:hidden p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100"
+                className="lg:hidden p-2 -ml-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -268,16 +269,16 @@ export function AnalyzerPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     to="/dashboard"
-                    className="text-xs font-semibold text-slate-500 hover:text-slate-800 no-underline"
+                    className="text-xs font-semibold text-slate-400 hover:text-white no-underline"
                   >
                     Dashboard
                   </Link>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                  <span className="text-xs font-bold text-primary-600">
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+                  <span className="text-xs font-bold text-indigo-400">
                     Repository Explorer
                   </span>
                 </div>
-                <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+                <h1 className="text-xl font-bold text-white tracking-tight mt-0.5">
                   {job?.repository?.fullName || "Analyze Repository"}
                 </h1>
               </div>
@@ -289,7 +290,7 @@ export function AnalyzerPage() {
                   onClick={reset}
                   variant="outline"
                   size="sm"
-                  className="font-medium"
+                  className="font-medium border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white"
                 >
                   <RotateCcw className="w-3.5 h-3.5 mr-1" />
                   Analyze Another
@@ -300,21 +301,21 @@ export function AnalyzerPage() {
 
           {/* Search / Ingestion Input Form */}
           {!jobId && (
-            <Card className="border-slate-200/90 shadow-card bg-white p-6 sm:p-8">
+            <div className="rounded-3xl border border-slate-800/90 bg-[#0D1322] p-6 sm:p-8 text-white shadow-2xl">
               <div className="max-w-2xl mx-auto text-center space-y-4">
-                <div className="inline-flex p-3 rounded-2xl bg-primary-50 text-primary-600 mb-2">
+                <div className="inline-flex p-3 rounded-2xl bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 mb-2 shadow-md">
                   <Sparkles className="w-7 h-7" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                <h2 className="text-2xl font-bold text-white tracking-tight">
                   Enter any GitHub repository URL
                 </h2>
-                <p className="text-sm text-slate-500 max-w-lg mx-auto">
+                <p className="text-sm text-slate-400 max-w-lg mx-auto">
                   RepoCipher AI pulls repository manifests, READMEs, and structure to generate instant architecture blueprints.
                 </p>
 
                 <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 pt-2">
                   <div className="relative flex-1">
-                    <FolderGit2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <FolderGit2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
                       type="text"
                       placeholder="https://github.com/facebook/react or owner/repo"
@@ -322,7 +323,7 @@ export function AnalyzerPage() {
                       onChange={(e) => setUrl(e.target.value)}
                       disabled={submitting}
                       autoFocus
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 focus:bg-white border border-slate-200 focus:border-primary-500 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 transition-all outline-none"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-950 hover:bg-slate-900/90 focus:bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl text-sm text-white placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
                     />
                   </div>
                   <Button
@@ -331,32 +332,32 @@ export function AnalyzerPage() {
                     loading={submitting}
                     variant="default"
                     size="lg"
-                    className="font-semibold shadow-md shadow-primary-500/10 whitespace-nowrap"
+                    className="font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-600/30 whitespace-nowrap"
                   >
-                    <Sparkles className="w-4 h-4 mr-1" />
+                    <Sparkles className="w-4 h-4 mr-1.5" />
                     Inspect Codebase
                   </Button>
                 </form>
 
                 {formError && (
-                  <p className="text-xs text-rose-500 font-semibold mt-2 flex items-center justify-center gap-1">
+                  <p className="text-xs text-rose-400 font-semibold mt-2 flex items-center justify-center gap-1 bg-rose-950/60 border border-rose-800/60 p-2.5 rounded-xl">
                     <AlertCircle className="w-3.5 h-3.5" />
                     {formError}
                   </p>
                 )}
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Active Job State */}
           {jobId && job && (
             <div className="space-y-6">
               {/* Repository Banner Card */}
-              <Card className="border-slate-200/90 shadow-card bg-white p-5 sm:p-6">
+              <div className="rounded-3xl border border-slate-800/90 bg-[#0D1322] p-5 sm:p-6 text-white shadow-2xl">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                         {job.repository.fullName}
                       </h2>
                       {job.repository.htmlUrl && (
@@ -364,7 +365,7 @@ export function AnalyzerPage() {
                           href={job.repository.htmlUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-700 no-underline font-medium"
+                          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-white no-underline font-medium"
                         >
                           <span>GitHub</span>
                           <ExternalLink className="w-3 h-3" />
@@ -378,41 +379,41 @@ export function AnalyzerPage() {
                     </div>
 
                     {job.repository.description && (
-                      <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">
+                      <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
                         {job.repository.description}
                       </p>
                     )}
 
                     {/* Stats pills */}
-                    <div className="flex flex-wrap items-center gap-2 mt-3 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex flex-wrap items-center gap-2 mt-3 pt-2 border-t border-slate-800 text-xs text-slate-300">
                       {job.repository.stars !== undefined && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200/80">
-                          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                           {job.repository.stars} stars
                         </span>
                       )}
                       {job.repository.forks !== undefined && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200/80">
-                          <GitBranch className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+                          <GitBranch className="w-3.5 h-3.5 text-slate-400" />
                           {job.repository.forks} forks
                         </span>
                       )}
                       {job.repository.pushedAt && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200/80">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+                          <Clock className="w-3.5 h-3.5 text-slate-500" />
                           Updated {timeAgo(job.repository.pushedAt)}
                         </span>
                       )}
                       {job.repository.license && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200/80">
-                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                           {job.repository.license}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
 
               {/* Progress Pipeline if still running */}
               {job.status !== "completed" && job.status !== "failed" && (
@@ -421,8 +422,8 @@ export function AnalyzerPage() {
 
               {/* Failure notification */}
               {job.status === "failed" && (
-                <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600" />
+                <div className="p-4 rounded-2xl bg-rose-950/70 border border-rose-800 text-xs text-rose-300 font-semibold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-400" />
                   <span>Analysis failed: {job.error || "Unable to parse repository tree."}</span>
                 </div>
               )}

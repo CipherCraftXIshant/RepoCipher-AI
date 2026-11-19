@@ -228,7 +228,7 @@ export function InterviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 flex text-slate-900 font-sans antialiased">
+    <div className="min-h-screen bg-[#080C14] flex text-slate-100 font-sans antialiased selection:bg-indigo-500/30 selection:text-white">
       <Sidebar
         user={userForSidebar}
         mobileOpen={mobileSidebarOpen}
@@ -244,24 +244,24 @@ export function InterviewPage() {
         />
 
         {/* Page Hero Header */}
-        <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 shadow-sm relative overflow-hidden">
+        <div className="rounded-3xl border border-slate-800/90 bg-gradient-to-r from-indigo-950 via-[#0B0F19] to-slate-950 text-white p-6 sm:p-8 shadow-2xl relative overflow-hidden">
           <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-radial from-indigo-500/10 to-transparent pointer-events-none" />
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
             <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-200 text-xs font-semibold border border-indigo-400/20">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-700/60 text-indigo-300 text-xs font-semibold">
                 <GraduationCap className="w-3.5 h-3.5 text-amber-300" />
-                Senior Engineering Simulator
+                Principal Staff Engineering Simulator
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                 Codebase Technical Interview Prep
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Test your mastery of any repository’s architecture, concurrency models, dependency boundaries, and trade-offs with AI-simulated technical interview loops.
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Master any repository’s architecture, concurrency models, dependency boundaries, and trade-offs through AI-simulated staff engineer interview loops.
               </p>
             </div>
 
             {/* Target Repo Picker */}
-            <div className="rounded-2xl bg-white/10 backdrop-blur-md p-4 border border-white/15 min-w-[260px] space-y-2 shrink-0">
+            <div className="rounded-2xl bg-slate-900/90 backdrop-blur-md p-4 border border-slate-800 min-w-[260px] space-y-2 shrink-0 shadow-xl">
               <label className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                 <FolderGit2 className="w-3.5 h-3.5 text-indigo-400" />
                 Select Target Repository
@@ -271,7 +271,7 @@ export function InterviewPage() {
               ) : repositories.length === 0 ? (
                 <div className="text-xs text-slate-400">
                   No analyzed repos yet.{" "}
-                  <Link to="/dashboard" className="text-indigo-300 underline font-semibold">
+                  <Link to="/dashboard" className="text-indigo-400 underline font-semibold">
                     Analyze a repo first
                   </Link>
                 </div>
@@ -279,7 +279,7 @@ export function InterviewPage() {
                 <select
                   value={selectedJobId || ""}
                   onChange={(e) => setSelectedJobId(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/80 border border-white/20 px-3 py-2 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                  className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                 >
                   {repositories.map((repo) => (
                     <option key={repo.id} value={repo.id} className="bg-slate-900 text-white">
@@ -294,61 +294,61 @@ export function InterviewPage() {
 
         {/* Stats Row */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-800/90 bg-[#0D1322] p-4 sm:p-5 shadow-xl text-white">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 flex items-center justify-center">
                 <GraduationCap className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded-full">
                 Tracked
               </span>
             </div>
-            <div className="mt-3 text-2xl font-extrabold text-slate-900">
+            <div className="mt-3 text-2xl font-extrabold text-white">
               {totalSessionsPracticed}
             </div>
             <div className="text-xs text-slate-400 font-medium">Interviews Practiced</div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-800/90 bg-[#0D1322] p-4 sm:p-5 shadow-xl text-white">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-violet-950/80 border border-violet-800/60 text-violet-400 flex items-center justify-center">
                 <MessageSquare className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-800/60 px-2 py-0.5 rounded-full">
                 Active
               </span>
             </div>
-            <div className="mt-3 text-2xl font-extrabold text-slate-900">
+            <div className="mt-3 text-2xl font-extrabold text-white">
               {totalQuestionsAnswered}
             </div>
             <div className="text-xs text-slate-400 font-medium">Questions Answered</div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-800/90 bg-[#0D1322] p-4 sm:p-5 shadow-xl text-white">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center">
                 <Award className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded-full">
                 AI Scored
               </span>
             </div>
-            <div className="mt-3 text-2xl font-extrabold text-slate-900">
+            <div className="mt-3 text-2xl font-extrabold text-white">
               {selectedJob?.healthScore ? `${selectedJob.healthScore}%` : "92%"}
             </div>
             <div className="text-xs text-slate-400 font-medium">Technical Readiness</div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
+          <div className="rounded-2xl border border-slate-800/90 bg-[#0D1322] p-4 sm:p-5 shadow-xl text-white">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-amber-950/80 border border-amber-800/60 text-amber-400 flex items-center justify-center">
                 <Clock className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">
                 Recent
               </span>
             </div>
-            <div className="mt-3 text-2xl font-extrabold text-slate-900 truncate">
+            <div className="mt-3 text-2xl font-extrabold text-white truncate">
               {savedHistory[0] ? timeAgo(savedHistory[0].timestamp) : "Ready now"}
             </div>
             <div className="text-xs text-slate-400 font-medium">Last Practice Turn</div>
@@ -356,15 +356,15 @@ export function InterviewPage() {
         </section>
 
         {/* Tab Buttons: Live Mock Interview vs Question Bank vs History */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setActiveMode("live")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeMode === "live"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white text-slate-600 hover:bg-slate-100"
+                  ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30"
+                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
               <Sparkles className="w-4 h-4" />
@@ -376,8 +376,8 @@ export function InterviewPage() {
               onClick={() => setActiveMode("study")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeMode === "study"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white text-slate-600 hover:bg-slate-100"
+                  ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30"
+                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
               <BookOpen className="w-4 h-4" />
@@ -389,8 +389,8 @@ export function InterviewPage() {
               onClick={() => setActiveMode("history")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeMode === "history"
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "bg-white text-slate-600 hover:bg-slate-100"
+                  ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30"
+                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
               <History className="w-4 h-4" />
@@ -401,13 +401,13 @@ export function InterviewPage() {
 
         {/* TAB 1: LIVE AI MOCK INTERVIEW */}
         {activeMode === "live" && (
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-sm space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="rounded-3xl border border-slate-800/90 bg-[#0D1322] p-5 sm:p-7 shadow-2xl space-y-6 text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
               <div>
-                <h3 className="font-bold text-base text-slate-900">
-                  Interactive Interviewer for <span className="text-indigo-600">{currentRepoName}</span>
+                <h3 className="font-bold text-base text-white">
+                  Interactive Interviewer for <span className="text-indigo-400">{currentRepoName}</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-400 mt-0.5">
                   5-round simulated interview assessing code architecture, performance boundaries, and implementation trade-offs.
                 </p>
               </div>
@@ -416,7 +416,7 @@ export function InterviewPage() {
                 type="button"
                 onClick={startLiveInterview}
                 disabled={interviewBusy || !selectedJobId}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Restart Interview</span>
@@ -426,19 +426,19 @@ export function InterviewPage() {
             {/* Conversation Flow */}
             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
               {sessionTurns.length === 0 && !currentQuestion && !interviewBusy && (
-                <div className="p-10 text-center flex flex-col items-center justify-center rounded-2xl bg-slate-50/60 border border-slate-200/80">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
+                <div className="p-10 text-center flex flex-col items-center justify-center rounded-2xl bg-slate-900/60 border border-slate-800">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-950/80 border border-indigo-800/60 text-indigo-400 flex items-center justify-center mb-3 shadow-lg">
                     <GraduationCap className="w-6 h-6" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Ready to begin your interview?</h4>
-                  <p className="text-xs text-slate-500 mt-1 max-w-md">
+                  <h4 className="font-bold text-sm text-white">Ready to begin your interview?</h4>
+                  <p className="text-xs text-slate-400 mt-1 max-w-md">
                     The interviewer will ask questions based on real files, manifests, and architecture in{" "}
-                    <strong>{currentRepoName}</strong>.
+                    <strong className="text-white">{currentRepoName}</strong>.
                   </p>
                   <button
                     type="button"
                     onClick={startLiveInterview}
-                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all cursor-pointer"
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>Start Mock Interview</span>
@@ -448,34 +448,34 @@ export function InterviewPage() {
 
               {/* Past turns */}
               {sessionTurns.map((turn, i) => (
-                <div key={i} className="space-y-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div key={i} className="space-y-3 p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
                   {/* Question */}
                   <div className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                       Q{i + 1}
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
                         Interviewer Question
                       </span>
-                      <p className="text-xs font-bold text-slate-900 mt-0.5">{turn.question}</p>
+                      <p className="text-xs font-bold text-white mt-0.5">{turn.question}</p>
                     </div>
                   </div>
 
                   {/* Candidate Answer */}
-                  <div className="flex items-start gap-3 pl-10 border-t border-slate-200/60 pt-2.5">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                  <div className="flex items-start gap-3 pl-10 border-t border-slate-800/80 pt-2.5">
+                    <div className="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-[10px] font-bold shrink-0">
                       You
                     </div>
-                    <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">{turn.answer}</p>
+                    <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{turn.answer}</p>
                   </div>
 
                   {/* Feedback */}
                   {turn.feedback && (
-                    <div className="mt-2 p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="mt-2 p-3 rounded-xl bg-emerald-950/70 border border-emerald-800/60 text-xs text-emerald-300 flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <div>
-                        <strong className="block text-[11px] font-bold text-emerald-800 uppercase">
+                        <strong className="block text-[11px] font-bold text-emerald-400 uppercase">
                           Interviewer Assessment
                         </strong>
                         <span className="leading-relaxed">{turn.feedback}</span>
@@ -487,24 +487,24 @@ export function InterviewPage() {
 
               {/* Active current question */}
               {currentQuestion && !interviewComplete && (
-                <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3 animate-in fade-in">
+                <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-800/80 space-y-3 animate-in fade-in">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 shadow-md">
                       Q{sessionTurns.length + 1}
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">
                         Current Round ({sessionTurns.length + 1} of 5)
                       </span>
-                      <h4 className="text-sm font-bold text-slate-900 mt-0.5 leading-snug">
+                      <h4 className="text-sm font-bold text-white mt-0.5 leading-snug">
                         {currentQuestion}
                       </h4>
                     </div>
                   </div>
 
                   {currentFeedback && (
-                    <p className="text-xs text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-                      <strong>Previous Turn Feedback:</strong> {currentFeedback}
+                    <p className="text-xs text-emerald-300 bg-emerald-950/70 p-2.5 rounded-xl border border-emerald-800/60">
+                      <strong className="text-emerald-400">Previous Round Assessment:</strong> {currentFeedback}
                     </p>
                   )}
                 </div>
@@ -512,7 +512,7 @@ export function InterviewPage() {
 
               {/* Interview Completion Card */}
               {interviewComplete && (
-                <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center space-y-3 shadow-md animate-in zoom-in-95">
+                <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-center space-y-3 shadow-xl animate-in zoom-in-95">
                   <Award className="w-10 h-10 mx-auto text-amber-300" />
                   <h4 className="font-extrabold text-base">Interview Loop Completed!</h4>
                   <p className="text-xs text-emerald-100 max-w-md mx-auto leading-relaxed">
@@ -521,7 +521,7 @@ export function InterviewPage() {
                   <button
                     type="button"
                     onClick={startLiveInterview}
-                    className="inline-flex items-center gap-2 rounded-xl bg-white text-emerald-800 font-bold px-4 py-2 text-xs shadow-sm hover:bg-emerald-50 transition-colors"
+                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 border border-emerald-400 text-white font-bold px-4 py-2 text-xs shadow-md hover:bg-slate-800 transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Practice Another Session</span>
@@ -530,8 +530,8 @@ export function InterviewPage() {
               )}
 
               {interviewBusy && (
-                <div className="flex items-center gap-2 text-xs text-indigo-600 p-3 bg-indigo-50/50 rounded-xl">
-                  <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping" />
+                <div className="flex items-center gap-2 text-xs text-indigo-400 p-3 bg-indigo-950/60 border border-indigo-850 rounded-xl">
+                  <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
                   <span>Interviewer is evaluating your response…</span>
                 </div>
               )}
@@ -541,8 +541,8 @@ export function InterviewPage() {
 
             {/* Answer Input Area */}
             {currentQuestion && !interviewComplete && (
-              <form onSubmit={submitAnswer} className="space-y-3 pt-3 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-700">
+              <form onSubmit={submitAnswer} className="space-y-3 pt-3 border-t border-slate-800">
+                <label className="block text-xs font-bold text-slate-300">
                   Your Technical Response
                 </label>
                 <div className="relative">
@@ -552,18 +552,18 @@ export function InterviewPage() {
                     onChange={(e) => setUserAnswer(e.target.value)}
                     placeholder="Explain your approach, design decisions, data flow, or error handling details…"
                     disabled={interviewBusy}
-                    className="w-full rounded-2xl border border-slate-200 p-3.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all"
+                    className="w-full rounded-2xl border border-slate-800 bg-slate-950 p-3.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-none transition-all"
                   />
                   <button
                     type="submit"
                     disabled={!userAnswer.trim() || interviewBusy}
-                    className="absolute right-3 bottom-3.5 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-40 transition-all cursor-pointer shadow-sm"
+                    className="absolute right-3 bottom-3.5 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-1.5 text-xs font-bold text-white hover:from-indigo-500 hover:to-violet-500 disabled:opacity-40 transition-all cursor-pointer shadow-md shadow-indigo-600/30"
                   >
                     <span>Submit Answer</span>
                     <Send className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   Ground your explanation in real code: reference key files, modules, or boundaries.
                 </p>
               </form>
@@ -573,13 +573,13 @@ export function InterviewPage() {
 
         {/* TAB 2: QUESTION BANK & STUDY CARDS */}
         {activeMode === "study" && (
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div className="rounded-3xl border border-slate-800/90 bg-[#0D1322] p-5 sm:p-7 shadow-2xl space-y-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
               <div>
-                <h3 className="font-bold text-base text-slate-900">
+                <h3 className="font-bold text-base text-white">
                   Codebase Study Cards ({questions.length})
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-400 mt-0.5">
                   Senior engineer model answers grounded in {currentRepoName}’s real AST.
                 </p>
               </div>
@@ -588,7 +588,7 @@ export function InterviewPage() {
                 type="button"
                 onClick={handleGenerateQuestions}
                 disabled={generatingQuestions || !selectedJobId}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-600/30 cursor-pointer disabled:opacity-50"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{generatingQuestions ? "Generating Q&As…" : "Generate Fresh Q&As"}</span>
@@ -596,17 +596,17 @@ export function InterviewPage() {
             </div>
 
             {questions.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl bg-slate-50 border border-slate-200/80">
-                <BookOpen className="w-10 h-10 mx-auto text-indigo-500 mb-2" />
-                <h4 className="font-bold text-sm text-slate-900">No study cards generated yet</h4>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              <div className="p-12 text-center rounded-2xl bg-slate-900/60 border border-slate-800">
+                <BookOpen className="w-10 h-10 mx-auto text-indigo-400 mb-2" />
+                <h4 className="font-bold text-sm text-white">No study cards generated yet</h4>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
                   Click below to generate high-yield interview questions covering architecture, testing, and stack decisions.
                 </p>
                 <button
                   type="button"
                   onClick={handleGenerateQuestions}
                   disabled={generatingQuestions || !selectedJobId}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition-all cursor-pointer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Generate Codebase Cards</span>
@@ -619,7 +619,7 @@ export function InterviewPage() {
                   return (
                     <div
                       key={idx}
-                      className="rounded-2xl border border-slate-200/90 overflow-hidden bg-slate-50/60 hover:bg-white transition-all"
+                      className="rounded-2xl border border-slate-800/90 overflow-hidden bg-slate-900/60 hover:border-slate-700 transition-all"
                     >
                       <button
                         type="button"
@@ -627,24 +627,24 @@ export function InterviewPage() {
                         className="w-full p-4 text-left flex items-start justify-between gap-3 cursor-pointer"
                       >
                         <div className="space-y-1">
-                          <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider border border-indigo-100">
+                          <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 text-[10px] font-bold uppercase tracking-wider border border-indigo-800/60">
                             {item.category || "Architecture"}
                           </span>
-                          <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
+                          <h4 className="font-bold text-xs sm:text-sm text-white leading-snug">
                             {item.question}
                           </h4>
                         </div>
                         <ChevronDown
-                          className={`w-4 h-4 text-slate-400 transition-transform shrink-0 mt-1 ${
-                            isOpen ? "rotate-180" : ""
+                          className={`w-4 h-4 text-slate-500 transition-transform shrink-0 mt-1 ${
+                            isOpen ? "rotate-180 text-indigo-400" : ""
                           }`}
                         />
                       </button>
 
                       {isOpen && (
-                        <div className="px-4 pb-4 pt-1 border-t border-slate-100 text-xs text-slate-700 leading-relaxed space-y-2 bg-white">
-                          <strong className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            Model Answer (Senior Engineer)
+                        <div className="px-4 pb-4 pt-2 border-t border-slate-800 text-xs text-slate-300 leading-relaxed space-y-2 bg-slate-950/80">
+                          <strong className="block text-[11px] font-bold text-indigo-400 uppercase tracking-wider">
+                            Model Answer (Staff Engineer Standard)
                           </strong>
                           <p className="whitespace-pre-wrap">{item.answer}</p>
                         </div>
@@ -659,13 +659,13 @@ export function InterviewPage() {
 
         {/* TAB 3: PRACTICE HISTORY LOG */}
         {activeMode === "history" && (
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-5 sm:p-7 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="rounded-3xl border border-slate-800/90 bg-[#0D1322] p-5 sm:p-7 shadow-2xl space-y-4 text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
               <div>
-                <h3 className="font-bold text-base text-slate-900">
+                <h3 className="font-bold text-base text-white">
                   Interview Practice Log & Transcripts
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-400 mt-0.5">
                   Complete history of past mock interviews, scores, and interviewer feedback.
                 </p>
               </div>
@@ -677,7 +677,7 @@ export function InterviewPage() {
                     localStorage.removeItem(STORAGE_INTERVIEW_KEY);
                     setSavedHistory([]);
                   }}
-                  className="text-xs font-semibold text-rose-600 hover:text-rose-700"
+                  className="text-xs font-semibold text-rose-400 hover:text-rose-300"
                 >
                   Clear History
                 </button>
@@ -685,31 +685,31 @@ export function InterviewPage() {
             </div>
 
             {savedHistory.length === 0 ? (
-              <div className="p-10 text-center text-xs text-slate-400">
+              <div className="p-10 text-center text-xs text-slate-500">
                 No past sessions recorded yet. Start a Live Mock Interview to build your practice history!
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-800">
                 {savedHistory.map((s, idx) => (
                   <div key={s.id || idx} className="py-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                        <span className="w-7 h-7 rounded-lg bg-indigo-950 text-indigo-400 border border-indigo-800/60 flex items-center justify-center font-bold text-xs">
                           #{savedHistory.length - idx}
                         </span>
                         <div>
-                          <h4 className="font-bold text-xs text-slate-900">{s.repoName}</h4>
-                          <span className="text-[11px] text-slate-400">{timeAgo(s.timestamp)}</span>
+                          <h4 className="font-bold text-xs text-white">{s.repoName}</h4>
+                          <span className="text-[11px] text-slate-500">{timeAgo(s.timestamp)}</span>
                         </div>
                       </div>
-                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                      <span className="text-[11px] font-semibold text-emerald-300 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/60">
                         {s.turnCount || 5} Rounds Completed
                       </span>
                     </div>
 
                     {s.finalFeedback && (
-                      <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200/80 leading-relaxed">
-                        <strong className="text-slate-900">Interviewer Review:</strong> {s.finalFeedback}
+                      <p className="text-xs text-slate-300 bg-slate-900/80 p-3 rounded-xl border border-slate-800 leading-relaxed">
+                        <strong className="text-emerald-400">Interviewer Review:</strong> {s.finalFeedback}
                       </p>
                     )}
                   </div>

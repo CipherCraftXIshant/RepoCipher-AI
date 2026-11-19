@@ -72,8 +72,8 @@ async function sendGeneralAssistantMessage(req, res) {
   }
 
   const prompt = [
-    { role: "user", parts: [{ text: "You are RepoCipher AI Assistant. You help developers understand software architecture, repository structures, debugging, best practices, and codebases. Give helpful, concise answers with markdown and code snippets." }] },
-    { role: "model", parts: [{ text: "Understood! I'm ready to help with any repository, codebase, or software architecture questions." }] },
+    { role: "user", parts: [{ text: "Introduce your role as RepoCipher AI." }] },
+    { role: "model", parts: [{ text: "I am RepoCipher AI, your Principal Systems Architect and Codebase Copilot. How can I assist with your software design, repository architecture, or engineering challenges today?" }] },
     ...history.slice(-10).map((m) => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.content }] })),
     { role: "user", parts: [{ text: message.trim() }] },
   ];
@@ -81,6 +81,11 @@ async function sendGeneralAssistantMessage(req, res) {
   const response = await generateWithFallback({
     contents: prompt,
     config: {
+      systemInstruction:
+        "You are RepoCipher AI, an elite Principal Software Architect and Staff Engineer. " +
+        "You provide deeply intelligent, technically rigorous, and actionable advice across software architecture, " +
+        "distributed systems, microservices vs monolith trade-offs, database optimization, cloud design, and code patterns. " +
+        "Always structure your answers with clear markdown headings, concise code blocks with language indicators, and concrete engineering trade-offs.",
       maxOutputTokens: 2048,
     },
   });

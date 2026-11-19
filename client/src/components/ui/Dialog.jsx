@@ -29,7 +29,7 @@ export function Dialog({ open, onOpenChange, children }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-200"
+        className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-200"
         onClick={() => onOpenChange?.(false)}
         aria-hidden="true"
       />
@@ -38,7 +38,7 @@ export function Dialog({ open, onOpenChange, children }) {
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        className="relative z-50 w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-popover animate-in fade-in zoom-in-95 duration-200"
+        className="relative z-50 w-full max-w-lg overflow-hidden rounded-3xl border border-slate-800 bg-[#0D1322] text-white p-6 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
       >
         {children}
       </div>
@@ -59,7 +59,7 @@ export function DialogTitle({ className, children, ...props }) {
   return (
     <div className="flex items-center justify-between">
       <h2
-        className={cn("text-lg font-semibold text-slate-900 leading-none", className)}
+        className={cn("text-lg font-bold text-white leading-none tracking-tight", className)}
         {...props}
       >
         {children}
@@ -71,7 +71,7 @@ export function DialogTitle({ className, children, ...props }) {
 export function DialogDescription({ className, ...props }) {
   return (
     <p
-      className={cn("text-xs text-slate-500 mt-1", className)}
+      className={cn("text-xs text-slate-400 mt-1 leading-relaxed", className)}
       {...props}
     />
   );
@@ -95,7 +95,7 @@ export function DialogClose({ onClick, className }) {
       type="button"
       onClick={onClick}
       className={cn(
-        "absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500/20",
+        "absolute right-4 top-4 rounded-xl p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20",
         className
       )}
     >
